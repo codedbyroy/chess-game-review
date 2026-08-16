@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess Game Review - Offline Engine Analysis</title>
+  <link rel="stylesheet" href="index.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+            <path d="M12 2v3M9 3.5l6 0" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Chess Game Review</h1>
+          <span class="badge">Offline Engine • Free</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="header-actions">
+        <!-- Chess.com Fetcher Form -->
+        <form id="fetch-form" class="fetch-form">
+          <div class="input-wrapper">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="username-input" placeholder="Chess.com Username" required autocomplete="off">
+          </div>
+          <button type="submit" class="btn btn-primary" id="fetch-btn">
+            <span>Fetch Games</span>
+          </button>
+        </form>
+
+        <button class="btn btn-secondary" id="open-pgn-modal-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Import PGN
+        </button>
+
+        <div class="engine-setting">
+          <label for="depth-select">Depth:</label>
+          <select id="depth-select">
+            <option value="12">12 (Fast)</option>
+            <option value="15" selected>15 (Recommended)</option>
+            <option value="18">18 (Deep)</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+      <!-- Left Column: Board & Navigation -->
+      <section class="board-section">
+        <!-- Player Card Top (Black) -->
+        <div class="player-card" id="black-player-card">
+          <div class="player-info">
+            <div class="avatar avatar-black">B</div>
+            <div class="player-details">
+              <span class="player-name" id="black-name">Black Player</span>
+              <span class="player-rating" id="black-rating">(1500)</span>
+            </div>
+          </div>
+          <div class="accuracy-pill" id="black-accuracy-pill">
+            <span class="acc-val" id="black-accuracy-text">--%</span>
+            <span class="acc-label">Accuracy</span>
+          </div>
+        </div>
+
+        <!-- Board & Eval Bar Container -->
+        <div class="board-area">
+          <!-- Eval Bar -->
+          <div class="eval-bar-container" id="eval-bar-container">
+            <div class="eval-bar-fill" id="eval-bar-fill"></div>
+            <div class="eval-bar-score" id="eval-bar-score">0.0</div>
+          </div>
+
+          <!-- Interactive Board -->
+          <div class="chessboard-wrapper">
+            <div id="chessboard" class="chessboard"></div>
+            <!-- Loading / Analysis Overlay -->
+            <div id="analysis-overlay" class="analysis-overlay hidden">
+              <div class="spinner"></div>
+              <div class="overlay-text" id="overlay-text">Analyzing Game...</div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="analysis-progress-fill"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Player Card Bottom (White) -->
+        <div class="player-card" id="white-player-card">
+          <div class="player-info">
+            <div class="avatar avatar-white">W</div>
+            <div class="player-details">
+              <span class="player-name" id="white-name">White Player</span>
+              <span class="player-rating" id="white-rating">(1500)</span>
+            </div>
+          </div>
+          <div class="accuracy-pill" id="white-accuracy-pill">
+            <span class="acc-val" id="white-accuracy-text">--%</span>
+            <span class="acc-label">Accuracy</span>
+          </div>
+        </div>
+
+        <!-- Board Control Toolbar -->
+        <div class="board-controls">
+          <button class="ctrl-btn" id="btn-first" title="First Move (Home)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+          </button>
+          <button class="ctrl-btn" id="btn-prev" title="Previous Move (Left Arrow)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="15 18 9 12 15 6 15 18"/></svg>
+          </button>
+          <button class="ctrl-btn btn-play" id="btn-play" title="Auto Play (Space)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+          <button class="ctrl-btn" id="btn-next" title="Next Move (Right Arrow)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="9 18 15 12 9 6 9 18"/></svg>
+          </button>
+          <button class="ctrl-btn" id="btn-last" title="Last Move (End)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+          </button>
+          <div class="divider"></div>
+          <button class="ctrl-btn" id="btn-flip" title="Flip Board (F)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12A9 9 0 0 0 6 5.3L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"/><path d="M21 21v-5h-5"/></svg>
+          </button>
+          <button class="ctrl-btn" id="btn-start-review" title="Run Game Review">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>Review Game</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Right Column: Game Review Dashboard -->
+      <section class="review-dashboard">
+        <!-- Review Overview Card -->
+        <div class="dashboard-card review-header-card">
+          <div class="game-meta">
+            <h2 id="game-title">Load or Select a Game</h2>
+            <div class="game-subtitle">
+              <span id="game-date">--</span> • <span id="game-eco">Standard Game</span>
+            </div>
+          </div>
+          <div class="review-status-badge" id="review-status-badge">
+            Ready for Analysis
+          </div>
+        </div>
+
+        <!-- Accuracy Meters Grid -->
+        <div class="dashboard-card accuracy-card">
+          <h3>Game Accuracy</h3>
+          <div class="accuracy-comparison">
+            <!-- White Meter -->
+            <div class="acc-meter-box">
+              <div class="acc-circle" id="white-circle" style="--acc: 0;">
+                <span class="acc-num" id="white-meter-val">--%</span>
+              </div>
+              <span class="acc-name" id="white-meter-name">White</span>
+            </div>
+            <!-- VS Divider -->
+            <div class="acc-vs">VS</div>
+            <!-- Black Meter -->
+            <div class="acc-meter-box">
+              <div class="acc-circle" id="black-circle" style="--acc: 0;">
+                <span class="acc-num" id="black-meter-val">--%</span>
+              </div>
+              <span class="acc-name" id="black-meter-name">Black</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Move Classifications Table -->
+        <div class="dashboard-card classifications-card">
+          <h3>Move Classifications</h3>
+          <div class="class-grid" id="class-grid">
+            <!-- Items injected by JS -->
+          </div>
+        </div>
+
+        <!-- Move Commentary Box -->
+        <div class="dashboard-card commentary-card">
+          <div class="commentary-header">
+            <div class="current-move-badge" id="current-move-badge">
+              <span class="badge-icon">--</span>
+              <span class="badge-title">Move 0</span>
+            </div>
+            <div class="eval-tag" id="current-eval-tag">Eval: 0.0</div>
+          </div>
+          <p class="commentary-text" id="commentary-text">
+            Start the review to generate move-by-move engine insights.
+          </p>
+        </div>
+
+        <!-- Evaluation Graph Canvas -->
+        <div class="dashboard-card graph-card">
+          <h3>Evaluation Graph</h3>
+          <div class="chart-container">
+            <canvas id="eval-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Move History Table -->
+        <div class="dashboard-card movelist-card">
+          <h3>Move History</h3>
+          <div class="movelist-container" id="movelist-container">
+            <!-- Rows injected by JS -->
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- PGN Import Modal -->
+  <div id="pgn-modal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Import PGN / Game Data</h3>
+        <button class="close-btn" id="close-pgn-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label for="pgn-textarea">Paste PGN text or load a file:</label>
+        <textarea id="pgn-textarea" placeholder="Paste PGN here... e.g. 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6..."></textarea>
+        <div class="file-upload-wrapper">
+          <input type="file" id="pgn-file-input" accept=".pgn,.txt">
+          <label for="pgn-file-input" class="btn btn-secondary btn-block">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Choose .pgn File
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancel-pgn-btn">Cancel</button>
+        <button class="btn btn-primary" id="load-pgn-btn">Load PGN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Games Selector Modal (When fetching from Chess.com) -->
+  <div id="games-modal" class="modal-backdrop hidden">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 id="games-modal-title">Recent Games from Chess.com</h3>
+        <button class="close-btn" id="close-games-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="games-list" class="games-list">
+          <!-- Game items injected dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="close-games-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
