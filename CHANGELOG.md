@@ -3,6 +3,26 @@
 All notable changes to the ChessLens project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Phase 1: Application Foundation] — 2026-10-11
+
+### Added
+- **Next.js 15 & React 19 Architecture**: Bootstrapped App Router with strict TypeScript and Tailwind CSS.
+- **Official `chess.js` Integration**: Added strict move validation and FEN generation in `src/lib/pgn-parser.ts`.
+- **Unit Test Suite (`tests/pgn-parser.test.ts`)**: 5 passing unit tests for headers, plies, castling, promotions, and malformed inputs.
+- **Component System**:
+  - `Chessboard.tsx`: 8x8 SVG piece board with coordinates and highlights.
+  - `BoardControls.tsx`: Move navigation controls and keyboard shortcut listeners.
+  - `MoveList.tsx`: Two-column auto-scrolling SAN move list.
+  - `PlayerCard.tsx`: Player metadata and active turn badges.
+  - `PgnModal.tsx`: File upload and text paste dialog.
+  - `Header.tsx`: Responsive navigation bar.
+- **Archived Prototype**: Preserved preliminary prototype code in `legacy-prototype/`.
+
+### Verified
+- `npm run typecheck`: Passed with 0 errors.
+- `npm test`: 5/5 Vitest unit tests passed.
+- `npm run build`: Production build and static page generation succeeded.
+
 ## [Phase 0: Repository Audit & Project Setup] — 2026-10-11
 
 ### Added

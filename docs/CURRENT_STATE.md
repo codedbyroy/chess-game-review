@@ -1,43 +1,37 @@
 # Current Implementation State — ChessLens
 
 ## 1. Metadata
-- **Current Phase:** Phase 0 (Repository Audit & Project Setup)
-- **Status:** Phase 0 Completed — Awaiting User Review to proceed to Phase 1.
+- **Current Phase:** Phase 1 (Application Foundation) — COMPLETED.
+- **Next Phase:** Phase 2 (Stockfish WebAssembly Integration).
 - **Last Verified Date:** 2026-10-11
-- **Active Git Branch:** `master` (tracking `origin/master`)
-- **Latest Commit:** `31a566c` (*Initial commit: Offline Chess Game Review Web App*)
-- **Environment:** Node `v25.2.0`, npm `11.6.2`, macOS
+- **Active Git Branch:** `master`
+- **Environment:** Node `v25.2.0`, npm `11.6.2`, Next.js 15, React 19, TypeScript strict mode, Tailwind CSS.
 
 ---
 
 ## 2. Verified Repository Inventory
-The repository currently contains:
-- `AGENTS.md`: Permanent operational guidelines for AI coding assistants.
-- `docs/`: Comprehensive project documentation suite (`PROJECT_BRIEF.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `DECISIONS.md`, `CURRENT_STATE.md`, `HANDOFF.md`, `TESTING.md`, `KNOWN_ISSUES.md`).
-- `CHANGELOG.md`: Project milestone history.
-- `index.html` & `index.css`: Initial prototype static proof-of-concept.
-- `js/`: Prototype JavaScript files (`chess.js`, `stockfish-worker.js`, `review-engine.js`, `app.js`).
+- `src/app/layout.tsx`: Root HTML shell with dark theme metadata.
+- `src/app/page.tsx`: Core responsive workspace assembling Header, Board, Controls, PlayerCards, and MoveList.
+- `src/components/Chessboard.tsx`: 8x8 SVG piece chessboard supporting flip, square selection, and last-move highlights.
+- `src/components/BoardControls.tsx`: Forward/backward step, start/end jump, auto-play timer, and keyboard shortcut handler.
+- `src/components/MoveList.tsx`: Auto-scrolling, two-column synchronized SAN move list.
+- `src/components/PlayerCard.tsx`: Player name, Elo ratings, and "To Move" turn indicator.
+- `src/components/PgnModal.tsx`: PGN paste and file uploader dialog with error handling.
+- `src/components/Header.tsx`: Navigation header with quick-load sample button and GitHub link.
+- `src/lib/pgn-parser.ts`: Strict `chess.js` PGN parser and header extractor.
+- `src/lib/types.ts`: Domain models (`MoveRecord`, `GameMetadata`, `ParsedGame`).
+- `tests/pgn-parser.test.ts`: Vitest unit tests verifying legal moves, castling, promotion, and error handling.
+- `legacy-prototype/`: Preserved initial static proof-of-concept.
+- `docs/`: Complete project documentation suite.
 
 ---
 
-## 3. Completed Tasks (Phase 0)
-- [x] Inspected Git repository working tree and commit history.
-- [x] Verified local Node.js and npm runtime compatibility.
-- [x] Audited existing prototype code to preserve key algorithms (win probability, classification rules).
-- [x] Documented system architecture, component boundaries, and Web Worker bridge in `docs/ARCHITECTURE.md`.
-- [x] Documented licensing obligations (Stockfish GPLv3, ChessLens MIT).
-- [x] Established Phase 1 implementation plan and acceptance criteria.
+## 3. Verified Checks & Test Results
+- `npm run typecheck` (`tsc --noEmit`): **0 errors** (Passed)
+- `npm test` (`vitest run`): **5 passed out of 5 tests (100%)** (Passed)
+- `npm run build` (`next build`): **Production build succeeded in 2.2s** (Passed)
 
 ---
 
-## 4. Current Incomplete Tasks
-- [ ] User review and approval of Phase 0 report.
-- [ ] Phase 1 initialization: Scaffolding Next.js (App Router) + TypeScript + Tailwind CSS structure.
-
----
-
-## 5. Verified Checks & Test Results
-- `node -v`: `v25.2.0` (Verified)
-- `npm -v`: `11.6.2` (Verified)
-- `git status`: Working tree clean (Verified)
-- `git log`: `31a566c` on branch `master` (Verified)
+## 4. Immediate Next Step
+Awaiting user review of Phase 1 to proceed to **Phase 2: Stockfish WebAssembly Integration**.

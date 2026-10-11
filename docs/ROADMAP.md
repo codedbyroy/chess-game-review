@@ -11,15 +11,15 @@
 
 ---
 
-## Phase 1: Application Foundation
-- [ ] Initialize Next.js project with TypeScript (strict), React 19/18, and Tailwind CSS.
-- [ ] Configure linting (ESLint) and testing infrastructure (Vitest).
-- [ ] Establish reusable layout system (header, board area, sidebar dashboard).
-- [ ] Integrate official `chess.js` for legal move generation and PGN parsing.
-- [ ] Build PGN Ingestion Modal & File Uploader with robust error handling.
-- [ ] Implement interactive, responsive Chessboard component with flip board support.
-- [ ] Implement synchronized Move List component supporting forward/backward navigation and keyboard shortcuts.
-- [ ] Verify Phase 1: Type check passes, Vitest unit tests pass, production build succeeds.
+## Phase 1: Application Foundation (Completed)
+- [x] Initialize Next.js project with TypeScript (strict), React 19, and Tailwind CSS.
+- [x] Configure linting and testing infrastructure (Vitest).
+- [x] Establish reusable layout system (header, board area, sidebar dashboard).
+- [x] Integrate official `chess.js` for legal move generation and PGN parsing.
+- [x] Build PGN Ingestion Modal & File Uploader with robust error handling.
+- [x] Implement interactive, responsive Chessboard component with flip board support.
+- [x] Implement synchronized Move List component supporting forward/backward navigation and keyboard shortcuts.
+- [x] Verify Phase 1: Type check passes, Vitest unit tests pass (5/5), production build succeeds.
 
 ---
 

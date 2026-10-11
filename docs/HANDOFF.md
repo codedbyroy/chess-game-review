@@ -9,35 +9,32 @@ You are collaborating with a software engineering student. Your role is a senior
 ---
 
 ## 2. Status at Handoff
-- **Active Phase:** Phase 0 (Repository Audit & Project Setup) — COMPLETED.
-- **Next Phase:** Phase 1 (Application Foundation).
-- **Git Branch:** `master` at commit `31a566c`.
-- **Environment:** Node `v25.2.0`, npm `11.6.2`, macOS.
+- **Active Phase:** Phase 1 (Application Foundation) — COMPLETED.
+- **Next Phase:** Phase 2 (Stockfish WebAssembly Integration).
+- **Git Branch:** `master`
+- **Environment:** Node `v25.2.0`, npm `11.6.2`, Next.js 15, React 19, Tailwind CSS, TypeScript.
 
 ---
 
-## 3. What Was Completed in Phase 0
-- Thoroughly audited existing files and Git history.
-- Created `AGENTS.md` and complete documentation suite in `docs/`:
-  - `docs/PROJECT_BRIEF.md`
-  - `docs/ARCHITECTURE.md`
-  - `docs/ROADMAP.md`
-  - `docs/DECISIONS.md`
-  - `docs/CURRENT_STATE.md`
-  - `docs/HANDOFF.md`
-  - `docs/TESTING.md`
-  - `docs/KNOWN_ISSUES.md`
-  - `CHANGELOG.md`
-- Clarified the GitHub Pages custom domain configuration error shown in the user's screenshot.
-- Formulated Phase 1 implementation tasks and acceptance criteria.
+## 3. What Was Completed in Phase 1
+- Bootstrapped Next.js App Router with TypeScript (`strict: true`) and Tailwind CSS.
+- Preserved initial static files cleanly inside `legacy-prototype/`.
+- Integrated official `chess.js` for legal FEN/PGN move replay.
+- Wrote unit tests in `tests/pgn-parser.test.ts` (100% pass: headers, full Opera Game plies, castling, promotion, malformed input error handling).
+- Built modular UI components:
+  - `Chessboard.tsx`: Responsive SVG board with flip, coordinates, and move highlights.
+  - `BoardControls.tsx`: Move navigation (`First`, `Previous`, `Next`, `Last`), auto-play, and keyboard shortcuts (`Left`/`Right`, `Home`/`End`, `Space`, `F`).
+  - `MoveList.tsx`: Synchronized, auto-scrolling move list.
+  - `PlayerCard.tsx`: Player metadata and dynamic "To Move" indicator.
+  - `PgnModal.tsx`: File upload and paste modal with error alerts.
+  - `Header.tsx`: Responsive branding and sample game launcher.
+- Verified: `npm run typecheck` (0 errors), `npm test` (5/5 passed), `npm run build` (Static export succeeded).
 
 ---
 
-## 4. Immediate Next Step (Upon User Approval)
-Begin **Phase 1: Application Foundation**:
-1. Move the initial static prototype into `legacy-prototype/` to preserve working code.
-2. Initialize the Next.js application with TypeScript (strict mode) and Tailwind CSS.
-3. Configure Vitest for unit testing.
-4. Integrate `chess.js` for legal FEN/PGN move validation.
-5. Build the core UI shell (responsive layout, PGN uploader modal, interactive chessboard, and move list).
-6. Verify Phase 1 with `npm run build`, `npm run lint`, and Vitest tests.
+## 4. Immediate Next Task (Phase 2)
+When user gives the signal to start **Phase 2: Stockfish WebAssembly Integration**:
+1. Select and embed a verified Stockfish.js / WebAssembly build in `public/engine/`.
+2. Implement Web Worker bridge with UCI protocol communication (`uci`, `isready`, `position fen`, `go depth`).
+3. Handle worker lifecycle: initialization, ready state, timeout, and request cancellation.
+4. Build unit tests for UCI message parsing (`tests/uci-protocol.test.ts`).
