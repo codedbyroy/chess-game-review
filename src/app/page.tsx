@@ -8,6 +8,9 @@ import { MoveList } from "@/components/MoveList";
 import { PlayerCard } from "@/components/PlayerCard";
 import { PgnModal } from "@/components/PgnModal";
 import { EngineEvalCard } from "@/components/EngineEvalCard";
+import { EvalGraph } from "@/components/EvalGraph";
+import { ReviewSummary } from "@/components/ReviewSummary";
+import { MoveFeedbackCard } from "@/components/MoveFeedbackCard";
 import { parsePgn, SAMPLE_OPERA_GAME } from "@/lib/pgn-parser";
 import { ParsedGame, GameAnalysisReport } from "@/lib/types";
 import { UciEvaluation } from "@/lib/uci-protocol";
@@ -59,6 +62,12 @@ export default function HomePage() {
     if (currentPlyIndex < 0 || moves.length === 0) return null;
     return moves[currentPlyIndex] || null;
   }, [currentPlyIndex, moves]);
+
+  // Active Analyzed Move (for feedback commentary)
+  const currentAnalyzedMove = useMemo(() => {
+    if (!analysisReport || currentPlyIndex < 0) return null;
+    return analysisReport.moves[currentPlyIndex] || null;
+  }, [analysisReport, currentPlyIndex]);
 
   // Navigation handler
   const handleGoToMove = (index: number) => {
@@ -233,7 +242,7 @@ export default function HomePage() {
           />
         </section>
 
-        {/* Right Section: Game Details, Move List, & Engine Review Card */}
+        {/* Right Section: Game Details, Momentum Graph, Review Summary, Move List, & Engine Card */}
         <section className="flex flex-col gap-5 w-full">
           {/* Game Metadata Card */}
           <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-3">
@@ -275,6 +284,25 @@ export default function HomePage() {
             </div>
           </div>
 
+          {/* Interactive Evaluation Momentum Graph */}
+          <EvalGraph
+            report={analysisReport}
+            currentIndex={currentPlyIndex}
+            onSelectPly={handleGoToMove}
+          />
+
+          {/* Game Review Summary (Accuracy & Classification counts) */}
+          <ReviewSummary
+            report={analysisReport}
+            whiteName={metadata.White || metadata.white || "White"}
+            blackName={metadata.Black || metadata.black || "Black"}
+          />
+
+          {/* Move Feedback Commentary Card */}
+          {analysisReport && (
+            <MoveFeedbackCard analyzedMove={currentAnalyzedMove} />
+          )}
+
           {/* Synchronized Move List with Classification Badges */}
           <MoveList
             moves={moves}
@@ -283,7 +311,7 @@ export default function HomePage() {
             onSelectMove={handleGoToMove}
           />
 
-          {/* Live Engine Review Card */}
+          {/* Engine Review Control Card */}
           <EngineEvalCard
             evaluation={evaluation}
             isAnalyzing={isAnalyzing}

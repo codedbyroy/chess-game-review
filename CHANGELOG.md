@@ -3,6 +3,24 @@
 All notable changes to the ChessLens project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Phase 4: Full Review Interface] — 2026-10-12
+
+### Added
+- **Evaluation Momentum Graph (`src/components/EvalGraph.tsx`)**:
+  - Interactive SVG momentum line chart with area shading and turning point markers (Blunder ❌, Brilliant ‼️, Miss ⚠️).
+  - Bidirectional scrub cursor: clicking any point jumps board and move list to that position.
+- **Game Review Summary Card (`src/components/ReviewSummary.tsx`)**:
+  - Side-by-side accuracy score comparison cards and category count comparison table for White and Black.
+- **Move Feedback Card (`src/components/MoveFeedbackCard.tsx`)**:
+  - Displays played move, engine recommended alternative, win-chance delta, and educational tactical commentary.
+- **Complete Synchronized Workflow**:
+  - Board, Move List, Eval Bar, Graph, and Feedback Cards fully synchronized.
+
+### Verified
+- `npm run typecheck`: Passed with 0 errors.
+- `npm test`: 28/28 Vitest tests passed.
+- `npm run build`: Production build and static prerendering succeeded in 2.0s.
+
 ## [Phase 3: Move-by-Move Game Analysis Pipeline] — 2026-10-12
 
 ### Added

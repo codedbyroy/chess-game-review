@@ -9,28 +9,33 @@ You are collaborating with a software engineering student. Your role is a senior
 ---
 
 ## 2. Status at Handoff
-- **Active Phase:** Phase 3 (Move-by-Move Game Analysis Pipeline) — COMPLETED.
-- **Next Phase:** Phase 4 (Full Review Interface).
+- **Active Phase:** Phase 4 (Full Review Interface) — COMPLETED.
+- **Next Phase:** Phase 5 (Reliability & Quality Assurance).
 - **Git Branch:** `master`
 - **Environment:** Node `v25.2.0`, npm `11.6.2`, Next.js 15, React 19, Tailwind CSS, TypeScript.
 
 ---
 
-## 3. What Was Completed in Phase 3
-- Implemented `centipawnsToWinProbability(whiteCp, whiteMate)` using logistic sigmoid conversion:
-  $$W = 50 + 50 \times \left(\frac{2}{1 + e^{-0.0035 \times cp}} - 1\right)$$
-- Implemented `classifyMove(...)` classifying moves by $\Delta Win\%$ into Brilliant (‼️), Best (⭐), Excellent (👍), Good, Book (📖), Inaccuracy (❓), Mistake (❓❓), Blunder (❌), and Miss (⚠️).
-- Implemented `calculatePlayerAccuracy(winLosses)` using an exponential decay model ($10\% - 100\%$).
-- Implemented `analyzeEntireGame(...)` in `EngineService` to sequentially process all moves on a background Web Worker with real-time percentage progress.
-- Wired batch game review into UI with live progress indicators and classification pills on the Move List.
-- Added 15 unit tests in `tests/review-pipeline.test.ts`. Total test suite: 28/28 passing (100%).
-- Verified: `npm run typecheck` (0 errors), `npm test` (28/28 passed), `npm run build` (Static export succeeded in 2.2s).
+## 3. What Was Completed in Phase 4
+- Implemented `src/components/EvalGraph.tsx`:
+  - Interactive SVG evaluation momentum graph.
+  - White/Black advantage area fills and 50% centerline.
+  - Critical turning point markers (Blunder ❌, Brilliant ‼️, Miss ⚠️).
+  - Vertical active cursor line synchronized with `currentPlyIndex`. Clicking any point scrubs the board to that move.
+- Implemented `src/components/ReviewSummary.tsx`:
+  - White vs Black accuracy score comparison cards.
+  - Detailed classification counts table comparing White vs Black moves.
+- Implemented `src/components/MoveFeedbackCard.tsx`:
+  - Shows played move, engine recommended alternative, win probability loss, and contextual educational commentary.
+- Assembled the full review workflow in `src/app/page.tsx` with bidirectional synchronization between Board, Move List, Graph, and Feedback Cards.
+- Verified: `npm run typecheck` (0 errors), `npm test` (28/28 passed), `npm run build` (Static export succeeded in 2.0s).
 
 ---
 
-## 4. Immediate Next Task (Phase 4)
-When user gives the signal to start **Phase 4: Full Review Interface**:
-1. Build interactive **Evaluation Momentum Graph** plotting centipawns / win probability over game ply.
-2. Synchronize graph clicks bidirectionally with the active board position and move list.
-3. Build **Game Summary Dashboard Card** displaying accuracy comparison gauges, classification badge breakdown counts, and critical turning points.
-4. Implement **Move Feedback Card** displaying played vs suggested moves with contextual commentary.
+## 4. Immediate Next Task (Phase 5)
+When user gives the signal to start **Phase 5: Reliability & Quality Assurance**:
+1. Expand Vitest test suites covering chess edge cases (en passant, underpromotion, castling, stalemate, repetition).
+2. Stress test malformed, truncated, and unusually long PGN files.
+3. Verify accessibility: ARIA labels, keyboard navigation, color contrast.
+4. Measure client-side memory footprint and engine worker stability.
+5. Resolve all outstanding defects and update `docs/KNOWN_ISSUES.md`.
