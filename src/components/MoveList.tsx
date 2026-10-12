@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { MoveRecord } from "@/lib/types";
+import { MoveRecord, GameAnalysisReport } from "@/lib/types";
 
 interface MoveListProps {
   moves: MoveRecord[];
   currentIndex: number;
+  report?: GameAnalysisReport | null;
   onSelectMove: (index: number) => void;
 }
 
 export const MoveList: React.FC<MoveListProps> = ({
   moves,
   currentIndex,
+  report,
   onSelectMove,
 }) => {
   const activeRef = useRef<HTMLButtonElement | null>(null);
@@ -64,6 +66,9 @@ export const MoveList: React.FC<MoveListProps> = ({
             const isWhiteActive = currentIndex === whiteIndex;
             const isBlackActive = currentIndex === blackIndex;
 
+            const whiteAnalysis = report?.moves[whiteIndex];
+            const blackAnalysis = report?.moves[blackIndex];
+
             return (
               <div
                 key={turn.moveNumber}
@@ -79,13 +84,22 @@ export const MoveList: React.FC<MoveListProps> = ({
                   <button
                     ref={isWhiteActive ? activeRef : null}
                     onClick={() => onSelectMove(whiteIndex)}
-                    className={`text-left py-1 px-2 rounded font-semibold transition-all ${
+                    className={`flex items-center justify-between py-1 px-2 rounded font-semibold transition-all ${
                       isWhiteActive
                         ? "bg-accent-green text-white shadow-sm font-bold"
                         : "text-neutral-200 hover:text-white hover:bg-card-hover"
                     }`}
                   >
-                    {turn.white.san}
+                    <span>{turn.white.san}</span>
+                    {whiteAnalysis && (
+                      <span
+                        className="text-[10px] ml-1.5 font-bold"
+                        style={{ color: whiteAnalysis.classification.color }}
+                        title={whiteAnalysis.classification.name}
+                      >
+                        {whiteAnalysis.classification.icon || "•"}
+                      </span>
+                    )}
                   </button>
                 )}
 
@@ -94,13 +108,22 @@ export const MoveList: React.FC<MoveListProps> = ({
                   <button
                     ref={isBlackActive ? activeRef : null}
                     onClick={() => onSelectMove(blackIndex)}
-                    className={`text-left py-1 px-2 rounded font-semibold transition-all ${
+                    className={`flex items-center justify-between py-1 px-2 rounded font-semibold transition-all ${
                       isBlackActive
                         ? "bg-accent-green text-white shadow-sm font-bold"
                         : "text-neutral-200 hover:text-white hover:bg-card-hover"
                     }`}
                   >
-                    {turn.black.san}
+                    <span>{turn.black.san}</span>
+                    {blackAnalysis && (
+                      <span
+                        className="text-[10px] ml-1.5 font-bold"
+                        style={{ color: blackAnalysis.classification.color }}
+                        title={blackAnalysis.classification.name}
+                      >
+                        {blackAnalysis.classification.icon || "•"}
+                      </span>
+                    )}
                   </button>
                 ) : (
                   <div />

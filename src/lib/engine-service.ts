@@ -4,11 +4,21 @@
  */
 
 import { UciEvaluation, parseUciInfoLine, parseBestMoveLine } from "./uci-protocol";
+import { MoveRecord, GameAnalysisReport } from "./types";
+import { analyzeGameMoves } from "./review-pipeline";
 
 export interface EvaluationRequest {
   fen: string;
   depth?: number;
   onProgress?: (evaluation: UciEvaluation) => void;
+}
+
+export interface GameAnalysisProgress {
+  currentPly: number;
+  totalPlies: number;
+  percentage: number;
+  currentMove: MoveRecord;
+  currentEval: UciEvaluation;
 }
 
 export class EngineService {
@@ -72,7 +82,7 @@ export class EngineService {
   }
 
   /**
-   * Evaluates a FEN position to a bounded depth with real-time updates.
+   * Evaluates a single FEN position to a bounded depth with real-time updates.
    * Cancels any previously running analysis job automatically.
    */
   public async evaluatePosition({
@@ -95,7 +105,7 @@ export class EngineService {
       command: "stop",
     });
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       let latestEval: UciEvaluation = {
         depth: 0,
         scoreCp: 0,
@@ -169,6 +179,48 @@ export class EngineService {
         command: `go depth ${depth}`,
       });
     });
+  }
+
+  /**
+   * Analyzes an entire sequence of game moves sequentially.
+   * Emits progress events and returns a comprehensive GameAnalysisReport.
+   */
+  public async analyzeEntireGame(
+    moves: MoveRecord[],
+    depth: number = 15,
+    onProgress?: (progress: GameAnalysisProgress) => void
+  ): Promise<GameAnalysisReport> {
+    await this.ensureReady();
+    const batchJobId = ++this.currentJobId;
+
+    const evaluations: UciEvaluation[] = [];
+    const total = moves.length;
+
+    for (let i = 0; i < total; i++) {
+      // Abort if batch was cancelled
+      if (batchJobId !== this.currentJobId) {
+        throw new Error("Game analysis was cancelled.");
+      }
+
+      const move = moves[i];
+      const evalResult = await this.evaluatePosition({
+        fen: move.fenAfter,
+        depth,
+      });
+
+      evaluations.push(evalResult);
+
+      const percentage = Math.round(((i + 1) / total) * 100);
+      onProgress?.({
+        currentPly: i + 1,
+        totalPlies: total,
+        percentage,
+        currentMove: move,
+        currentEval: evalResult,
+      });
+    }
+
+    return analyzeGameMoves(moves, evaluations);
   }
 
   /**
@@ -293,7 +345,7 @@ export class EngineService {
           self.postMessage({ type: 'UCI_LINE', line: line });
 
           currentDepth++;
-        }, 40);
+        }, 30);
       }
     `;
   }

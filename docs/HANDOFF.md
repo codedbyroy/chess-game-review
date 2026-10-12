@@ -9,31 +9,28 @@ You are collaborating with a software engineering student. Your role is a senior
 ---
 
 ## 2. Status at Handoff
-- **Active Phase:** Phase 2 (Stockfish WebAssembly Integration) — COMPLETED.
-- **Next Phase:** Phase 3 (Move-by-Move Game Analysis Pipeline).
+- **Active Phase:** Phase 3 (Move-by-Move Game Analysis Pipeline) — COMPLETED.
+- **Next Phase:** Phase 4 (Full Review Interface).
 - **Git Branch:** `master`
 - **Environment:** Node `v25.2.0`, npm `11.6.2`, Next.js 15, React 19, Tailwind CSS, TypeScript.
 
 ---
 
-## 3. What Was Completed in Phase 2
-- Built `src/lib/uci-protocol.ts` to parse standard UCI output lines (`info depth X score cp Y pv ...`, `info depth X score mate Z`, `bestmove M`).
-- Normalized centipawn and mate evaluations to **White's perspective** for consistent global analysis.
-- Created `src/lib/engine-service.ts` managing the Web Worker lifecycle with:
-  - Non-blocking execution on a background thread.
-  - Automatic cancellation (`stop`) and stale response guarding (`jobId`).
-  - Timeout protection.
-- Built `src/components/EngineEvalCard.tsx` with live depth meters, best move badges, line previews, and depth selector (12/15/18).
-- Integrated dynamic Evaluation Bar into `src/components/Chessboard.tsx`.
-- Added 8 unit tests in `tests/uci-protocol.test.ts`. Total tests: 13/13 passing.
-- Verified: `npm run typecheck` (0 errors), `npm test` (13/13 passed), `npm run build` (Static export succeeded).
+## 3. What Was Completed in Phase 3
+- Implemented `centipawnsToWinProbability(whiteCp, whiteMate)` using logistic sigmoid conversion:
+  $$W = 50 + 50 \times \left(\frac{2}{1 + e^{-0.0035 \times cp}} - 1\right)$$
+- Implemented `classifyMove(...)` classifying moves by $\Delta Win\%$ into Brilliant (‼️), Best (⭐), Excellent (👍), Good, Book (📖), Inaccuracy (❓), Mistake (❓❓), Blunder (❌), and Miss (⚠️).
+- Implemented `calculatePlayerAccuracy(winLosses)` using an exponential decay model ($10\% - 100\%$).
+- Implemented `analyzeEntireGame(...)` in `EngineService` to sequentially process all moves on a background Web Worker with real-time percentage progress.
+- Wired batch game review into UI with live progress indicators and classification pills on the Move List.
+- Added 15 unit tests in `tests/review-pipeline.test.ts`. Total test suite: 28/28 passing (100%).
+- Verified: `npm run typecheck` (0 errors), `npm test` (28/28 passed), `npm run build` (Static export succeeded in 2.2s).
 
 ---
 
-## 4. Immediate Next Task (Phase 3)
-When user gives the signal to start **Phase 3: Move-by-Move Game Analysis Pipeline**:
-1. Implement full-game sequential analysis queue (`src/lib/review-pipeline.ts`).
-2. Build win-probability mapping formula converting centipawns to expected win percentage ($Win\%$).
-3. Implement move classification logic (Brilliant, Best, Excellent, Good, Inaccuracy, Mistake, Blunder, Miss).
-4. Compute White and Black overall game accuracy ratings (0–100%).
-5. Add unit tests for win-probability calculation and move classification rules in `tests/review-pipeline.test.ts`.
+## 4. Immediate Next Task (Phase 4)
+When user gives the signal to start **Phase 4: Full Review Interface**:
+1. Build interactive **Evaluation Momentum Graph** plotting centipawns / win probability over game ply.
+2. Synchronize graph clicks bidirectionally with the active board position and move list.
+3. Build **Game Summary Dashboard Card** displaying accuracy comparison gauges, classification badge breakdown counts, and critical turning points.
+4. Implement **Move Feedback Card** displaying played vs suggested moves with contextual commentary.

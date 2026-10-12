@@ -9,9 +9,9 @@ import { PlayerCard } from "@/components/PlayerCard";
 import { PgnModal } from "@/components/PgnModal";
 import { EngineEvalCard } from "@/components/EngineEvalCard";
 import { parsePgn, SAMPLE_OPERA_GAME } from "@/lib/pgn-parser";
-import { ParsedGame } from "@/lib/types";
+import { ParsedGame, GameAnalysisReport } from "@/lib/types";
 import { UciEvaluation } from "@/lib/uci-protocol";
-import { EngineService } from "@/lib/engine-service";
+import { EngineService, GameAnalysisProgress } from "@/lib/engine-service";
 import { Trophy, Calendar, MapPin } from "lucide-react";
 
 export default function HomePage() {
@@ -22,10 +22,15 @@ export default function HomePage() {
   const [orientation, setOrientation] = useState<"w" | "b">("w");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Engine state
+  // Single-position engine state
   const [evaluation, setEvaluation] = useState<UciEvaluation | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [targetDepth, setTargetDepth] = useState<number>(15);
+
+  // Full-game review batch state
+  const [isBatchReviewing, setIsBatchReviewing] = useState(false);
+  const [reviewProgress, setReviewProgress] = useState<GameAnalysisProgress | null>(null);
+  const [analysisReport, setAnalysisReport] = useState<GameAnalysisReport | null>(null);
 
   const engineServiceRef = useRef<EngineService | null>(null);
 
@@ -55,15 +60,22 @@ export default function HomePage() {
     return moves[currentPlyIndex] || null;
   }, [currentPlyIndex, moves]);
 
-  // Stop analysis and reset evaluation when navigating between moves
+  // Navigation handler
   const handleGoToMove = (index: number) => {
-    if (isAnalyzing) {
+    if (isAnalyzing || isBatchReviewing) {
       engineServiceRef.current?.stop();
       setIsAnalyzing(false);
+      setIsBatchReviewing(false);
     }
     const clamped = Math.max(-1, Math.min(index, moves.length - 1));
     setCurrentPlyIndex(clamped);
-    setEvaluation(null); // Clear position evaluation on navigation
+
+    // If report exists for this move, load its evaluation
+    if (analysisReport && clamped >= 0 && analysisReport.moves[clamped]) {
+      setEvaluation(analysisReport.moves[clamped].evaluation);
+    } else {
+      setEvaluation(null);
+    }
   };
 
   const handleFlipBoard = () => {
@@ -71,9 +83,10 @@ export default function HomePage() {
   };
 
   const handleLoadPgn = (pgnText: string): boolean => {
-    if (isAnalyzing) {
+    if (isAnalyzing || isBatchReviewing) {
       engineServiceRef.current?.stop();
       setIsAnalyzing(false);
+      setIsBatchReviewing(false);
     }
     const result = parsePgn(pgnText);
     if (result.error || result.moves.length === 0) {
@@ -82,6 +95,8 @@ export default function HomePage() {
     setParsedGame(result);
     setCurrentPlyIndex(-1);
     setEvaluation(null);
+    setAnalysisReport(null);
+    setReviewProgress(null);
     return true;
   };
 
@@ -111,10 +126,40 @@ export default function HomePage() {
     }
   }, [currentFen, targetDepth]);
 
-  // Stop current analysis
+  // Start full game review batch
+  const handleStartFullReview = useCallback(async () => {
+    if (!engineServiceRef.current || moves.length === 0) return;
+    setIsBatchReviewing(true);
+    setAnalysisReport(null);
+
+    try {
+      const report = await engineServiceRef.current.analyzeEntireGame(
+        moves,
+        targetDepth,
+        (progress) => {
+          setReviewProgress(progress);
+          setCurrentPlyIndex(progress.currentPly - 1);
+          setEvaluation(progress.currentEval);
+        }
+      );
+
+      setAnalysisReport(report);
+      setCurrentPlyIndex(0);
+      setEvaluation(report.moves[0]?.evaluation || null);
+    } catch (err) {
+      console.error("[HomePage] Full game review error:", err);
+    } finally {
+      setIsBatchReviewing(false);
+      setReviewProgress(null);
+    }
+  }, [moves, targetDepth]);
+
+  // Stop analysis handler
   const handleStopAnalysis = useCallback(() => {
     engineServiceRef.current?.stop();
     setIsAnalyzing(false);
+    setIsBatchReviewing(false);
+    setReviewProgress(null);
   }, []);
 
   // Determine active turn for player cards
@@ -188,7 +233,7 @@ export default function HomePage() {
           />
         </section>
 
-        {/* Right Section: Game Details, Move List, & Engine Card */}
+        {/* Right Section: Game Details, Move List, & Engine Review Card */}
         <section className="flex flex-col gap-5 w-full">
           {/* Game Metadata Card */}
           <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-3">
@@ -230,21 +275,26 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Synchronized Move List */}
+          {/* Synchronized Move List with Classification Badges */}
           <MoveList
             moves={moves}
             currentIndex={currentPlyIndex}
+            report={analysisReport}
             onSelectMove={handleGoToMove}
           />
 
-          {/* Live Engine Evaluation Card */}
+          {/* Live Engine Review Card */}
           <EngineEvalCard
             evaluation={evaluation}
             isAnalyzing={isAnalyzing}
+            isBatchReviewing={isBatchReviewing}
+            reviewProgress={reviewProgress}
+            report={analysisReport}
             targetDepth={targetDepth}
             onDepthChange={setTargetDepth}
             onStartAnalysis={handleStartAnalysis}
             onStopAnalysis={handleStopAnalysis}
+            onStartFullReview={handleStartFullReview}
           />
         </section>
       </main>

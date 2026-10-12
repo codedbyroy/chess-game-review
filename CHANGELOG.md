@@ -3,6 +3,28 @@
 All notable changes to the ChessLens project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Phase 3: Move-by-Move Game Analysis Pipeline] — 2026-10-12
+
+### Added
+- **Win Probability Sigmoid Model (`src/lib/review-pipeline.ts`)**:
+  - Converts centipawns and forced mates into exact win percentages ($0\% - 100\%$).
+- **Deterministic Move Classification Logic**:
+  - Classifies moves based on change in win probability into Brilliant (‼️), Best (⭐), Excellent (👍), Good, Book (📖), Inaccuracy (❓), Mistake (❓❓), Blunder (❌), and Miss (⚠️).
+- **Player Accuracy Formula**:
+  - Calculates overall game accuracy scores (0–100%) for White and Black based on average win loss.
+- **Batch Game Review Engine (`src/lib/engine-service.ts`)**:
+  - Added `analyzeEntireGame` method executing sequential evaluations in background Web Worker.
+- **UI Enhancements**:
+  - Added "Review Full Game" button with animated progress bar and cancellation.
+  - Added real-time classification pills to the Move List.
+- **Test Suite (`tests/review-pipeline.test.ts`)**:
+  - 15 new unit tests covering win probability math, classification rules, accuracy ratings, and batch reporting. Total tests: 28/28 passing.
+
+### Verified
+- `npm run typecheck`: Passed with 0 errors.
+- `npm test`: 28/28 Vitest tests passed.
+- `npm run build`: Production build and static prerendering succeeded.
+
 ## [Phase 2: Stockfish WebAssembly Integration] — 2026-10-12
 
 ### Added

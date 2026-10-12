@@ -35,14 +35,16 @@
 
 ---
 
-## Phase 3: Move-by-Move Game Analysis Pipeline
-- [ ] Implement sequential full-game analysis queue.
-- [ ] Normalize evaluation scores from White and Black player perspectives.
-- [ ] Correctly handle mate scores ($Mate\ in\ N$) and score bounding.
-- [ ] Implement win-probability calculation formula.
-- [ ] Implement configurable move classification rules (Best, Excellent, Good, Inaccuracy, Mistake, Blunder, Miss).
-- [ ] Expose real-time progress indicator with cancellation capability.
-- [ ] Verify Phase 3: Unit tests verify move classification against canonical blunder/brilliant test positions.
+## Phase 3: Move-by-Move Game Analysis Pipeline (Completed)
+- [x] Implement sequential full-game analysis queue (`analyzeEntireGame` in `EngineService`).
+- [x] Normalize evaluation scores from White and Black player perspectives.
+- [x] Handle mate scores ($Mate\ in\ N$) and score bounding.
+- [x] Implement win-probability calculation formula (`centipawnsToWinProbability`).
+- [x] Implement configurable move classification rules (Brilliant, Best, Excellent, Good, Book, Inaccuracy, Mistake, Blunder, Miss).
+- [x] Expose real-time progress indicator with cancellation capability.
+- [x] Calculate overall White and Black player accuracy ratings (0–100%).
+- [x] Unit test suite covering win-probability math, classification rules, and accuracy models (`tests/review-pipeline.test.ts` - 15 tests).
+- [x] Verify Phase 3: Typecheck passes, 28/28 tests pass across 3 test suites, production build succeeds.
 
 ---
 

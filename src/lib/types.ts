@@ -2,6 +2,8 @@
  * Core domain types for ChessLens
  */
 
+import { UciEvaluation } from "./uci-protocol";
+
 export interface GameMetadata {
   event?: string;
   site?: string;
@@ -35,4 +37,40 @@ export interface ParsedGame {
   moves: MoveRecord[];
   startingFen: string;
   error?: string | null;
+}
+
+export type MoveClassificationKey =
+  | "brilliant"
+  | "best"
+  | "excellent"
+  | "good"
+  | "book"
+  | "inaccuracy"
+  | "mistake"
+  | "blunder"
+  | "miss";
+
+export interface MoveClassification {
+  key: MoveClassificationKey;
+  name: string;
+  icon: string;
+  color: string;
+  commentary: string;
+}
+
+export interface AnalyzedMove extends MoveRecord {
+  evaluation: UciEvaluation;
+  winProbWhite: number;
+  winLoss: number;
+  classification: MoveClassification;
+}
+
+export interface GameAnalysisReport {
+  moves: AnalyzedMove[];
+  whiteAccuracy: number;
+  blackAccuracy: number;
+  classificationCounts: {
+    white: Record<MoveClassificationKey, number>;
+    black: Record<MoveClassificationKey, number>;
+  };
 }
