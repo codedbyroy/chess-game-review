@@ -100,7 +100,11 @@ export const Chessboard: React.FC<ChessboardProps> = ({
       </div>
 
       {/* Main Board Container */}
-      <div className="relative aspect-square flex-1 select-none rounded-xl overflow-hidden border-2 border-border shadow-2xl bg-card">
+      <div
+        role="region"
+        aria-label="Interactive chessboard"
+        className="relative aspect-square flex-1 select-none rounded-xl overflow-hidden border-2 border-border shadow-2xl bg-card"
+      >
         <div className="grid grid-cols-8 grid-rows-8 w-full h-full">
           {Array.from({ length: 64 }).map((_, index) => {
             const rawRow = Math.floor(index / 8);

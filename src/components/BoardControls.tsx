@@ -94,6 +94,7 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           onClick={() => onGoToMove(-1)}
           disabled={currentIndex <= -1}
           title="Start Position (Home)"
+          aria-label="Go to starting position"
           className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-card-hover disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
         >
           <ChevronFirst className="w-5 h-5" />
@@ -103,6 +104,7 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           onClick={() => onGoToMove(currentIndex - 1)}
           disabled={currentIndex <= -1}
           title="Previous Move (Left Arrow)"
+          aria-label="Previous move"
           className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-card-hover disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -111,6 +113,7 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
         <button
           onClick={() => setIsPlaying((prev) => !prev)}
           title="Auto-play (Space)"
+          aria-label={isPlaying ? "Pause auto-play" : "Start auto-play"}
           className="p-2.5 rounded-lg bg-accent-green hover:bg-accent-green-hover text-white transition-all transform active:scale-95"
         >
           {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
@@ -120,6 +123,7 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           onClick={() => onGoToMove(currentIndex + 1)}
           disabled={currentIndex >= totalMoves - 1}
           title="Next Move (Right Arrow)"
+          aria-label="Next move"
           className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-card-hover disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
         >
           <ChevronRight className="w-5 h-5" />
@@ -129,6 +133,7 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
           onClick={() => onGoToMove(totalMoves - 1)}
           disabled={currentIndex >= totalMoves - 1}
           title="Last Move (End)"
+          aria-label="Go to last move"
           className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-card-hover disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
         >
           <ChevronLast className="w-5 h-5" />
@@ -140,6 +145,7 @@ export const BoardControls: React.FC<BoardControlsProps> = ({
       <button
         onClick={onFlipBoard}
         title="Flip Board (F)"
+        aria-label="Flip chessboard orientation"
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-neutral-300 hover:text-white hover:bg-card-hover transition-colors"
       >
         <RotateCcw className="w-4 h-4" />

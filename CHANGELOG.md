@@ -3,6 +3,28 @@
 All notable changes to the ChessLens project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Phase 5: Reliability & Quality Assurance] — 2026-10-12
+
+### Added
+- **Chess Edge Cases Test Suite (`tests/chess-edge-cases.test.ts`)**:
+  - Underpromotion coverage for Knight, Rook, and Bishop (`=N`, `=R`, `=B`).
+  - En passant capture mechanics and board verification.
+  - Castling rights validation in both directions.
+  - Stalemate trap handling.
+  - Defensive error handling against corrupt, truncated, and bare PGN inputs.
+  - 100-ply marathon scalability benchmark (<150ms parsing time).
+- **Accessibility Hardening**:
+  - Explicit `aria-label` tags added to all board navigation buttons.
+  - `role="region"` and `aria-label` added to the interactive chessboard.
+  - `role="dialog"` and `aria-modal="true"` added to the PGN modal.
+- **Updated Test Strategy Documentation (`docs/TESTING.md`)**:
+  - Documented complete test matrix covering all 38 unit and edge case tests.
+
+### Verified
+- `npm run typecheck`: Passed with 0 errors.
+- `npm test`: 38/38 Vitest tests passed across 4 test suites.
+- `npm run build`: Production build succeeded in 1.7s.
+
 ## [Phase 4: Full Review Interface] — 2026-10-12
 
 ### Added

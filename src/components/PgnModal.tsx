@@ -62,15 +62,23 @@ export const PgnModal: React.FC<PgnModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-card border border-border rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="import-pgn-title"
+        className="bg-card border border-border rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-accent-green" />
-            <h2 className="font-bold text-base text-foreground">Import PGN Game</h2>
+            <h2 id="import-pgn-title" className="font-bold text-base text-foreground">
+              Import PGN Game
+            </h2>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close modal"
             className="p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-card-hover transition-colors"
           >
             <X className="w-5 h-5" />

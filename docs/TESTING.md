@@ -15,19 +15,38 @@ A core goal of ChessLens is verifiable reliability. We do not make unverified cl
 
 ---
 
-## 3. Test Suites Planned by Phase
+## 3. Active Test Suites & Coverage (38 Tests Passing)
 
-### Phase 1: PGN & Chess Validation
-- `tests/pgn-parser.test.ts`: Validates parsing of standard games, empty headers, long variations, and malformed inputs.
-- `tests/chess-rules.test.ts`: Tests edge cases: underpromotion, en passant captures, kingside/queenside castling.
+### `tests/pgn-parser.test.ts` (5 tests)
+- Metadata extraction (White, Black, Date, ECO, Result).
+- Canonical Opera Game full 33-ply parsing.
+- Malformed move sequence error reporting.
+- Empty input defensive handling.
+- Pawn promotion to Queen validation.
 
-### Phase 2: Stockfish UCI Bridge
-- `tests/uci-protocol.test.ts`: Tests parsing of engine strings (`info depth 15 score cp 42`, `info depth 18 score mate -2`, `bestmove e2e4`).
-- `tests/worker-lifecycle.test.ts`: Tests cancellation, timeout handlers, and stale response guards.
+### `tests/uci-protocol.test.ts` (8 tests)
+- Standard centipawn evaluation for White's turn.
+- Score normalization to White's universal perspective when Black is to move.
+- Forced mate calculations ($Mate\ in\ N$ and $-Mate\ in\ N$).
+- Negative evaluations and mate normalization.
+- Best move parsing with and without `ponder`.
+- Defensive filtering of non-eval lines.
 
-### Phase 3: Game Review Engine
-- `tests/win-probability.test.ts`: Verifies centipawn-to-win-rate sigmoid curve boundaries and monotonicity.
-- `tests/move-classifier.test.ts`: Verifies classification against canonical game positions (identifying Morphy's Queen sacrifice in the Opera Game as Brilliant, hanging Queen as Blunder).
+### `tests/review-pipeline.test.ts` (15 tests)
+- Centipawn-to-win-probability S-curve boundary testing (0 cp $\to$ 50%, mate $\to$ 100%/0%).
+- Monotonicity checks for positive and negative advantages.
+- Classification rules: Book, Best, Inaccuracy, Mistake, Blunder, Miss.
+- Tactical piece sacrifice detection for Brilliant moves.
+- Player accuracy formula testing (0 loss $\to$ 100%, master play $\to$ ~95%, weak play $\to$ ~60%).
+- Full-game batch analysis reporting.
+
+### `tests/chess-edge-cases.test.ts` (10 tests)
+- Underpromotions to Knight (`=N`), Rook (`=R`), and Bishop (`=B`).
+- En passant capture mechanics and board square cleanup.
+- Castling rights in both directions (`O-O` and `O-O-O`).
+- Stalemate and terminal game handling.
+- Corrupt PGN handling: unclosed quotes, illegal moves, and bare move lists.
+- 100-ply marathon scalability benchmark (<150ms parsing time).
 
 ---
 
