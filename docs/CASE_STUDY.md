@@ -167,9 +167,10 @@ ChessLens integrates with public APIs from both major chess platforms without re
 
 ## 6. Reliability & Test Matrix
 
-The codebase includes **44 automated unit tests** in Vitest:
+The codebase includes **57 automated unit tests** in Vitest across 8 test suites:
 - **`uci-protocol.test.ts` (8 tests):** UCI output parsing, mate string parsing (`mate -3`, `mate 5`), White score normalization.
-- **`review-pipeline.test.ts` (15 tests):** Logistic sigmoid bounds, win delta calculations, classification thresholds, and player accuracy models.
+- **`move-classifier.test.ts` (6 tests):** True material sacrifice requirement for brilliant moves (`isTrueMaterialSacrifice`), opening book classification without false brilliancies, forced move detection, blunder detection.
+- **`accuracy-engine.test.ts` / `review-pipeline.test.ts` (15 tests):** Logistic sigmoid bounds, win delta calculations, classification thresholds, and player accuracy models.
 - **`pgn-parser.test.ts` (5 tests):** Header metadata extraction, FEN history generation, and move list formatting.
 - **`chess-edge-cases.test.ts` (10 tests):**
   - Pawn underpromotions (`=N`, `=R`, `=B`).
@@ -179,6 +180,8 @@ The codebase includes **44 automated unit tests** in Vitest:
   - Malformed and corrupt PGN sanitization.
   - 100-ply marathon scalability benchmark (<150ms).
 - **`chess-api.test.ts` (6 tests):** Lichess and Chess.com mock API responses, 404 user handling, and empty archive edge cases.
+- **`engine-service.test.ts` (6 tests):** UCI handshake, position evaluation caching (`evalCache`), batch game review with progress reporting, clean cancellation, worker termination.
+- **`real-stockfish-integration.test.ts` (1 test):** Authentic Stockfish engine search on the Opera Game, verifying non-inflated brilliant move counts (0 in opening) and diverse engine move suggestions.
 
 ---
 
@@ -191,7 +194,16 @@ The codebase includes **44 automated unit tests** in Vitest:
 > *"The browser main thread handles rendering and DOM events at 60 FPS. If Stockfish ran on the main thread, its alpha-beta minimax tree search would block the JavaScript event loop. We spawned Stockfish inside a dedicated Web Worker via an inlined Blob. Communications occur purely via asynchronous `postMessage` calls using the UCI protocol."*
 
 ### Q3: How did you handle out-of-order responses when users rapidly navigate through moves?
-> *"We assigned an incremental monotonic `jobId` to every evaluation request and sent a `stop` command to cancel previous searches. When the Web Worker emits evaluation lines, we check if the message's `jobId` matches the currently active `jobId`. If it doesn't, we discard it. This guarantees that stale asynchronous engine responses never overwrite the active board position."*
+> *"We assigned an incremental monotonic `jobId` to every evaluation request and sent a `stop` command with an asynchronous yield barrier. When the Web Worker emits evaluation lines, we check if the message's `jobId` matches the currently active `jobId`. If it doesn't, we discard it. This guarantees that stale asynchronous engine responses never overwrite the active board position."*
 
 ### Q4: Why can't you just use centipawns directly to classify moves?
 > *"Centipawns are unbounded and non-linear in practical play. Losing 200 centipawns when the evaluation is +1.0 (dropping from winning to equal) completely flips the game outcome, whereas losing 200 centipawns when the evaluation is +9.0 leaves White completely winning. By mapping centipawns through a logistic sigmoid curve ($W(cp)$), we calculate move quality based on $\Delta Win\%$, accurately reflecting human game impact."*
+
+### Q5: How did you audit and repair the implausible brilliant move counts (17 for White)?
+> *"The initial prototype classified any quiet piece move (pawn push, knight hop, bishop development) where win loss was under 1.0% as a brilliant move because of a flawed condition `move.captured === null && ['n','b','r','q'].includes(move.piece)`. In reality, a brilliant move requires a true material sacrifice. We implemented `isTrueMaterialSacrifice`, which analyzes piece counts and piece values before and after the move, ensuring the moving player genuinely offered material while maintaining a strong, winning evaluation. Under this conservative rule, opening moves are correctly identified as Book or Best, eliminating false brilliancies."*
+
+### Q6: Why were recommended moves initially showing the opponent's reply instead of the player's best choice?
+> *"In the legacy batch loop, the engine evaluated each ply at `move.fenAfter`. The resulting `bestmove` was therefore the opponent's optimal response, not what the active player should have played! We solved this by evaluating the starting position $P_0$ (`moves[0].fenBefore`) and tracking the evaluation before each move (`fenBefore`). We then convert the engine's UCI choice into SAN from `fenBefore` using `uciToSan`, guaranteeing that suggested alternatives show what the active player should have played."*
+
+### Q7: How does position caching improve review performance and UX?
+> *"Chess games frequently contain transpositions and repeated positions. Furthermore, users constantly scrub back and forth through the move list during review. By maintaining an in-memory `evalCache` map keyed by normalized FEN strings, positions already analyzed during batch review load instantaneously (<1ms) when clicked in the move list or momentum graph, avoiding redundant engine re-computations and yielding a silky smooth UI."*

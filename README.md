@@ -4,7 +4,7 @@
 
 [![CI Test Suite & Build Verification](https://github.com/codedbyroy/chess-game-review/actions/workflows/ci.yml/badge.svg)](https://github.com/codedbyroy/chess-game-review/actions/workflows/ci.yml)
 [![Deploy to GitHub Pages](https://github.com/codedbyroy/chess-game-review/actions/workflows/deploy.yml/badge.svg)](https://github.com/codedbyroy/chess-game-review/actions/workflows/deploy.yml)
-[![Tests Passing](https://img.shields.io/badge/Vitest-50%2F50%20Passed-brightgreen.svg)](docs/TESTING.md)
+[![Tests Passing](https://img.shields.io/badge/Vitest-57%2F57%20Passed-brightgreen.svg)](docs/TESTING.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](tsconfig.json)
 [![Next.js](https://img.shields.io/badge/Next.js-15.2-black.svg)](https://nextjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -128,14 +128,17 @@ npm test
 ```
 
 ```text
- ✓ tests/chess-api.test.ts (6 tests)
  ✓ tests/uci-protocol.test.ts (8 tests)
+ ✓ tests/chess-api.test.ts (6 tests)
+ ✓ tests/move-classifier.test.ts (6 tests)
  ✓ tests/review-pipeline.test.ts (15 tests)
  ✓ tests/pgn-parser.test.ts (5 tests)
  ✓ tests/chess-edge-cases.test.ts (10 tests)
+ ✓ tests/engine-service.test.ts (6 tests)
+ ✓ tests/real-stockfish-integration.test.ts (1 test)
 
-Test Files  5 passed (5)
-     Tests  44 passed (44)
+Test Files  8 passed (8)
+     Tests  57 passed (57)
 ```
 
 Test suites cover:

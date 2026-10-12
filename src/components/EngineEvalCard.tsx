@@ -78,9 +78,9 @@ export const EngineEvalCard: React.FC<EngineEvalCardProps> = ({
             disabled={isAnalyzing || isBatchReviewing}
             className="bg-[#1a1917] border border-border text-xs rounded-lg px-2 py-1 text-neutral-300 focus:outline-none focus:border-accent-green"
           >
-            <option value="12">12 (Fast)</option>
-            <option value="15">15 (Standard)</option>
-            <option value="18">18 (Deep)</option>
+            <option value="10">10 (Fast Review)</option>
+            <option value="12">12 (Standard Review)</option>
+            <option value="15">15 (Deep Analysis)</option>
           </select>
         </div>
       </div>

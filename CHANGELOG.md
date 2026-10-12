@@ -3,6 +3,39 @@
 All notable changes to the ChessLens project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Engine Repair — Phases C, D, E: Authentic Stockfish Integration & UI Refinement] — 2026-10-12
+
+### Added
+- **Authentic Stockfish.js Web Worker Engine (`public/stockfish.js`)**:
+  - Vendored lightweight single-threaded Stockfish.js Web Worker build (1.58MB asm.js / Niklas Fiekas) with zero external network or SharedArrayBuffer dependencies.
+  - Full client-side browser execution with zero server compute costs ($0/mo hosting).
+  - Included Stockfish GNU General Public License v3 (`public/stockfish-LICENSE.txt`).
+- **Position Evaluation Caching (`evalCache` in `src/lib/engine-service.ts`)**:
+  - Implemented 500-entry in-memory evaluation cache keyed by normalized FEN string.
+  - Automatically bypasses engine computation on recurring positions and transpositions.
+  - Provides instantaneous evaluation loading when users scrub through reviewed moves.
+- **Race-Free Concurrency Control & Synchronization Barriers**:
+  - Implemented `isSearching` state tracking and `stopResolve` synchronization barriers.
+  - Eliminates stale UCI output leakage when searches are cancelled or positions change rapidly.
+  - Asynchronous batch cancellation support with monotonic `batchId` matching.
+- **Calibrated Search Depth Options**:
+  - Fast Review (Depth 10, ~5-7s full game review).
+  - Standard Review (Depth 12).
+  - Deep Analysis (Depth 15).
+- **Unit and Integration Test Suites**:
+  - `tests/engine-service.test.ts`: 6 tests verifying handshake, caching, batch review, cancellation, and termination.
+  - `tests/real-stockfish-integration.test.ts`: 1 test verifying authentic Stockfish analysis, conservative brilliant-move rate, and diverse best-move generation.
+
+### Changed
+- **Streamlined UI Layout (`src/app/page.tsx`)**:
+  - Positioned `EngineEvalCard` prominently at the top of the review sidebar above `EvalGraph`.
+  - Gives users instant access to "Review Full Game", live progress indicators, and depth configuration without scrolling.
+
+### Verified
+- `npm run typecheck`: Passed with 0 errors (100% Type-Safe).
+- `npm test`: 57/57 Vitest tests passing across 8 suites (100% Passed).
+- `npm run build`: Production static export succeeded in 1.9s.
+
 ## [Engine Repair — Phase B: Core Correctness] — 2026-10-12
 
 ### Fixed

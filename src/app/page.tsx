@@ -28,7 +28,7 @@ export default function HomePage() {
   // Single-position engine state
   const [evaluation, setEvaluation] = useState<UciEvaluation | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [targetDepth, setTargetDepth] = useState<number>(15);
+  const [targetDepth, setTargetDepth] = useState<number>(10);
 
   // Full-game review batch state
   const [isBatchReviewing, setIsBatchReviewing] = useState(false);
@@ -288,6 +288,20 @@ export default function HomePage() {
             </div>
           </div>
 
+          {/* Engine Review Control Card */}
+          <EngineEvalCard
+            evaluation={evaluation}
+            isAnalyzing={isAnalyzing}
+            isBatchReviewing={isBatchReviewing}
+            reviewProgress={reviewProgress}
+            report={analysisReport}
+            targetDepth={targetDepth}
+            onDepthChange={setTargetDepth}
+            onStartAnalysis={handleStartAnalysis}
+            onStopAnalysis={handleStopAnalysis}
+            onStartFullReview={handleStartFullReview}
+          />
+
           {/* Interactive Evaluation Momentum Graph */}
           <EvalGraph
             report={analysisReport}
@@ -313,20 +327,6 @@ export default function HomePage() {
             currentIndex={currentPlyIndex}
             report={analysisReport}
             onSelectMove={handleGoToMove}
-          />
-
-          {/* Engine Review Control Card */}
-          <EngineEvalCard
-            evaluation={evaluation}
-            isAnalyzing={isAnalyzing}
-            isBatchReviewing={isBatchReviewing}
-            reviewProgress={reviewProgress}
-            report={analysisReport}
-            targetDepth={targetDepth}
-            onDepthChange={setTargetDepth}
-            onStartAnalysis={handleStartAnalysis}
-            onStopAnalysis={handleStopAnalysis}
-            onStartFullReview={handleStartFullReview}
           />
         </section>
       </main>
