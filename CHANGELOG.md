@@ -3,6 +3,25 @@
 All notable changes to the ChessLens project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Phase 6: Production Deployment] — 2026-10-12
+
+### Added
+- **Static Export Configuration (`next.config.ts`)**:
+  - Configured Next.js for client-side static site generation (`output: 'export'`).
+  - Added trailing slash resolution (`trailingSlash: true`) and unoptimized image support (`images: { unoptimized: true }`).
+  - Dynamically configured `basePath` and `assetPrefix` when `GITHUB_PAGES=true` to support GitHub Pages subpath deployment while keeping Vercel/custom domain deployments clean.
+- **GitHub Actions Workflows**:
+  - Added `.github/workflows/ci.yml`: Automated CI pipeline running `npm run typecheck`, `npm test`, and `npm run build` on PRs and pushes to `master`.
+  - Added `.github/workflows/deploy.yml`: Automated CD pipeline that builds and deploys static artifacts to GitHub Pages via official `actions/deploy-pages@v4`.
+- **Production README & Documentation**:
+  - Overhauled `README.md` with badging, live demo links, architecture diagram (Mermaid), mathematical models, and setup guides.
+
+### Verified
+- `npm run typecheck`: Passed with 0 errors.
+- `npm test`: 38/38 Vitest tests passed across 4 test suites.
+- `npm run build`: Static export succeeded cleanly in 3.1s emitting static HTML/JS bundle into `out/`.
+- `GITHUB_PAGES=true npm run build`: Static export with base path `/chess-game-review` succeeded cleanly.
+
 ## [Phase 5: Reliability & Quality Assurance] — 2026-10-12
 
 ### Added
