@@ -155,8 +155,12 @@ export default function HomePage() {
       setAnalysisReport(report);
       setCurrentPlyIndex(0);
       setEvaluation(report.moves[0]?.evaluation || null);
-    } catch (err) {
-      console.error("[HomePage] Full game review error:", err);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes("cancelled")) {
+        console.info("[HomePage] Game review was cancelled by user.");
+      } else {
+        console.error("[HomePage] Full game review error:", err);
+      }
     } finally {
       setIsBatchReviewing(false);
       setReviewProgress(null);

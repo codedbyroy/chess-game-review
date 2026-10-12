@@ -24,6 +24,7 @@ export interface GameAnalysisProgress {
 export class EngineService {
   private worker: Worker | null = null;
   private currentJobId: number = 0;
+  private activeBatchId: number = 0;
   private isReady: boolean = false;
   private readyCallbacks: Array<() => void> = [];
 
@@ -191,14 +192,14 @@ export class EngineService {
     onProgress?: (progress: GameAnalysisProgress) => void
   ): Promise<GameAnalysisReport> {
     await this.ensureReady();
-    const batchJobId = ++this.currentJobId;
+    const batchId = ++this.activeBatchId;
 
     const evaluations: UciEvaluation[] = [];
     const total = moves.length;
 
     for (let i = 0; i < total; i++) {
       // Abort if batch was cancelled
-      if (batchJobId !== this.currentJobId) {
+      if (batchId !== this.activeBatchId) {
         throw new Error("Game analysis was cancelled.");
       }
 
@@ -207,6 +208,11 @@ export class EngineService {
         fen: move.fenAfter,
         depth,
       });
+
+      // Check again after evaluation in case cancel was called during search
+      if (batchId !== this.activeBatchId) {
+        throw new Error("Game analysis was cancelled.");
+      }
 
       evaluations.push(evalResult);
 
@@ -224,9 +230,10 @@ export class EngineService {
   }
 
   /**
-   * Immediately terminates the current search.
+   * Immediately terminates the current search and any ongoing batch review.
    */
   public stop(): void {
+    this.activeBatchId++;
     this.currentJobId++;
     this.worker?.postMessage({
       type: "UCI_COMMAND",
