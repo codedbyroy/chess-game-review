@@ -4,7 +4,7 @@
 
 [![CI Test Suite & Build Verification](https://github.com/codedbyroy/chess-game-review/actions/workflows/ci.yml/badge.svg)](https://github.com/codedbyroy/chess-game-review/actions/workflows/ci.yml)
 [![Deploy to GitHub Pages](https://github.com/codedbyroy/chess-game-review/actions/workflows/deploy.yml/badge.svg)](https://github.com/codedbyroy/chess-game-review/actions/workflows/deploy.yml)
-[![Tests Passing](https://img.shields.io/badge/Vitest-38%2F38%20Passed-brightgreen.svg)](docs/TESTING.md)
+[![Tests Passing](https://img.shields.io/badge/Vitest-44%2F44%20Passed-brightgreen.svg)](docs/TESTING.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](tsconfig.json)
 [![Next.js](https://img.shields.io/badge/Next.js-15.2-black.svg)](https://nextjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -27,6 +27,7 @@ Unlike traditional chess review tools that send PGNs to expensive backend analys
 
 - **⚡ 100% Client-Side Engine Analysis:** Stockfish runs in a dedicated Web Worker using asynchronous UCI messaging. Your device does the math; no servers, no rate limits, no queue delays.
 - **🔒 Zero Data Transmission (Privacy-First):** PGNs and game moves never leave your browser.
+- **🌐 One-Click Account Importer:** Direct client-side integration with **Chess.com** and **Lichess** public APIs — analyze any player's latest game by username without downloading files.
 - **📉 Win-Probability Sigmoid Scoring:** Centipawn engine scores are mapped into intuitive win chances using a verified logistic sigmoid curve ($W = 50 + 50 \times \tanh(0.00175 \times cp)$).
 - **🏷️ 9-Tier Move Classification:** Categorizes moves into **Brilliant**, **Best**, **Excellent**, **Good**, **Book**, **Inaccuracy**, **Mistake**, **Blunder**, and **Miss**.
 - **📈 Interactive Evaluation Momentum Graph:** SVG-rendered momentum curve visualizing White/Black advantages across every ply, with click-to-move scrubbing and turning-point indicators.
@@ -127,16 +128,18 @@ npm test
 ```
 
 ```text
+ ✓ tests/chess-api.test.ts (6 tests)
  ✓ tests/uci-protocol.test.ts (8 tests)
  ✓ tests/review-pipeline.test.ts (15 tests)
  ✓ tests/pgn-parser.test.ts (5 tests)
  ✓ tests/chess-edge-cases.test.ts (10 tests)
 
-Test Files  4 passed (4)
-     Tests  38 passed (38)
+Test Files  5 passed (5)
+     Tests  44 passed (44)
 ```
 
 Test suites cover:
+- **Online platform APIs**: Lichess and Chess.com success parsing, 404 user validation, and empty archive edge cases.
 - **Pawn underpromotions** (`=N`, `=R`, `=B`), verifying disambiguation and legal move generation.
 - **En passant captures** and castling rights preservation across FEN transitions.
 - **Stalemate and draw detection** without engine crashes.
@@ -178,6 +181,7 @@ npm run build
 
 ## 📚 Project Documentation
 
+- [**Technical Case Study & System Design**](docs/CASE_STUDY.md): Complete engineering architecture, concurrency, math models, and interview Q&A.
 - [**System Architecture**](docs/ARCHITECTURE.md): Web Worker concurrency, state management, and component breakdown.
 - [**Phased Roadmap**](docs/ROADMAP.md): Milestone progress and completed deliverables.
 - [**Architectural Decisions (ADRs)**](docs/DECISIONS.md): Key engineering choices and trade-offs.

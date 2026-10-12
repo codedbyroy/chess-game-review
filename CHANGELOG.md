@@ -3,6 +3,26 @@
 All notable changes to the ChessLens project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Phase 7: Portfolio Presentation & Enhancements] — 2026-10-12
+
+### Added
+- **Online Chess Platform Game Importer (`src/lib/chess-api.ts`)**:
+  - Implemented direct client-side integration with Lichess public API (`/api/games/user/{username}`).
+  - Implemented two-stage monthly archive traversal for Chess.com PubAPI (`/pub/player/{username}/games/archives`).
+  - Added robust validation, 404 user detection, empty archive handling, and loading state dispatching.
+- **Enhanced PGN Ingestion Modal (`src/components/PgnModal.tsx`)**:
+  - Tabbed interface switching seamlessly between manual PGN input, file upload, and online username fetching.
+  - Quick-preset one-click buttons for famous grandmasters (`Hikaru`, `MagnusCarlsen`, `GothamChess`).
+- **Platform API Test Suite (`tests/chess-api.test.ts`)**:
+  - 6 new unit tests testing mock API responses, edge cases, 404 status codes, and input validation.
+- **Technical Case Study (`docs/CASE_STUDY.md`)**:
+  - Comprehensive engineering case study documenting Web Worker concurrency, mathematical models, $0 cloud architecture, and technical interview questions & answers.
+
+### Verified
+- `npm run typecheck`: Passed with 0 errors.
+- `npm test`: 44/44 Vitest tests passed across 5 test suites.
+- `npm run build`: Production static export succeeded in 2.2s.
+
 ## [Phase 6: Production Deployment] — 2026-10-12
 
 ### Added

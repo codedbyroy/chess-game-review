@@ -79,7 +79,10 @@
 
 ---
 
-## Phase 7: Portfolio Presentation & Enhancements
-- [ ] (Optional) Add Chess.com / Lichess username game fetcher.
-- [ ] Create technical case study explaining Stockfish WebAssembly concurrency and move classification algorithms.
-- [ ] Prepare portfolio screenshots, demo recording, and LinkedIn launch post.
+## Phase 7: Portfolio Presentation & Enhancements (Completed)
+- [x] Implement Chess.com & Lichess online game fetcher (`src/lib/chess-api.ts`).
+- [x] Enhance PGN modal with tabbed account importer and famous player presets (`src/components/PgnModal.tsx`).
+- [x] Add unit test suite for platform API integrations (`tests/chess-api.test.ts` - 6 tests, 44/44 total passing).
+- [x] Create comprehensive Technical Case Study & Interview Guide (`docs/CASE_STUDY.md`).
+- [x] Prepare LinkedIn launch announcement and technical interview talking points.
+- [x] Verify Phase 7: 44/44 unit tests pass, TypeScript strict check passes, static export build succeeds.
