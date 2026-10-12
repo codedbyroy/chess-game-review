@@ -63,6 +63,9 @@ export interface AnalyzedMove extends MoveRecord {
   winProbWhite: number;
   winLoss: number;
   classification: MoveClassification;
+  bestMoveSan?: string;
+  bestMoveUci?: string;
+  isForced?: boolean;
 }
 
 export interface GameAnalysisReport {

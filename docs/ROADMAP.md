@@ -86,3 +86,35 @@
 - [x] Create comprehensive Technical Case Study & Interview Guide (`docs/CASE_STUDY.md`).
 - [x] Prepare LinkedIn launch announcement and technical interview talking points.
 - [x] Verify Phase 7: 44/44 unit tests pass, TypeScript strict check passes, static export build succeeds.
+
+---
+
+## Engine Audit & Move Classification Repair Milestones
+
+### Phase A: Audit and Diagnosis (Completed)
+- [x] Audit entire codebase from engine Web Worker to UI rendering.
+- [x] Identify root cause of inflated 17 brilliant moves (quiet piece moves false positive).
+- [x] Diagnose opponent-move inversion in `MoveFeedbackCard`.
+- [x] Confirm synthetic material heuristic in Web Worker script.
+- [x] Produce prioritized diagnosis report.
+
+### Phase B: Core Correctness (Completed)
+- [x] Separate review engine into modular boundaries (`move-classifier.ts`, `accuracy-engine.ts`, `review-pipeline.ts`).
+- [x] Implement conservative, verifiable brilliant move criteria requiring genuine material sacrifice.
+- [x] Implement forced move detection (`isForced: true`).
+- [x] Evaluate starting FEN in `analyzeEntireGame` to provide baseline and Move 1 recommendations.
+- [x] Generate `bestMoveSan` from `fenBefore` for active player and display in `MoveFeedbackCard`.
+- [x] Verify Phase B: Strict typecheck passes (0 errors), 50/50 unit tests pass across 6 suites, static build succeeds.
+
+### Phase C: Engine and Accuracy Quality (Upcoming)
+- [ ] Integrate official Stockfish WebAssembly binary into Web Worker.
+- [ ] Stream real principal variation (PV) and genuine multi-depth evaluations.
+- [ ] Implement position caching for evaluated FENs.
+
+### Phase D: Interface Refinement (Upcoming)
+- [ ] Align board layout, eval bar, and review cards across viewport breakpoints.
+- [ ] Enhance responsive behavior and accessibility attributes.
+
+### Phase E: Final Verification & Release (Upcoming)
+- [ ] Comprehensive E2E verification on full representative games.
+- [ ] Update public documentation, case study, and changelog.

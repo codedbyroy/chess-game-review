@@ -194,6 +194,22 @@ export class EngineService {
     await this.ensureReady();
     const batchId = ++this.activeBatchId;
 
+    if (moves.length === 0) {
+      return analyzeGameMoves([], []);
+    }
+
+    // Evaluate starting position to establish baseline and Move 1 recommendation
+    let startingEval: UciEvaluation | undefined;
+    if (moves[0]?.fenBefore) {
+      startingEval = await this.evaluatePosition({
+        fen: moves[0].fenBefore,
+        depth,
+      });
+      if (batchId !== this.activeBatchId) {
+        throw new Error("Game analysis was cancelled.");
+      }
+    }
+
     const evaluations: UciEvaluation[] = [];
     const total = moves.length;
 
@@ -226,7 +242,7 @@ export class EngineService {
       });
     }
 
-    return analyzeGameMoves(moves, evaluations);
+    return analyzeGameMoves(moves, evaluations, startingEval);
   }
 
   /**

@@ -19,10 +19,11 @@ export const MoveFeedbackCard: React.FC<MoveFeedbackCardProps> = ({
     );
   }
 
-  const { classification, winLoss, san, moveNumber, turn, evaluation } =
+  const { classification, winLoss, san, moveNumber, turn, bestMoveSan } =
     analyzedMove;
   const isWhite = turn === "w";
   const playerLabel = isWhite ? "White" : "Black";
+  const hasAlternative = bestMoveSan && bestMoveSan !== san && winLoss > 2.0;
 
   return (
     <div className="bg-card border border-border rounded-xl p-4 shadow-sm space-y-3">
@@ -72,15 +73,15 @@ export const MoveFeedbackCard: React.FC<MoveFeedbackCardProps> = ({
         </div>
       </div>
 
-      {/* Suggested Alternative (if move had significant loss) */}
-      {evaluation.bestMove && winLoss > 4.0 && (
+      {/* Suggested Alternative (for the moving player from fenBefore) */}
+      {hasAlternative && (
         <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-card-hover/40 border border-border/80 text-xs">
           <span className="text-neutral-400 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-accent-gold" />
             <span>Recommended Alternative:</span>
           </span>
           <span className="font-mono font-bold text-accent-green bg-accent-green/10 border border-accent-green/20 px-2 py-0.5 rounded">
-            {evaluation.bestMove}
+            {bestMoveSan}
           </span>
         </div>
       )}

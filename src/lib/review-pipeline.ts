@@ -1,13 +1,42 @@
 /**
- * Review Pipeline: Win Probability Mapping, Move Classification, & Accuracy Calculation.
+ * Review Pipeline: Coordinates Position Analysis, Move Classification, & Accuracy Calculation.
  */
 
-import { MoveRecord, AnalyzedMove, GameAnalysisReport, MoveClassification, MoveClassificationKey } from "./types";
+import { Chess } from "chess.js";
+import {
+  MoveRecord,
+  AnalyzedMove,
+  GameAnalysisReport,
+  MoveClassification,
+  MoveClassificationKey,
+} from "./types";
 import { UciEvaluation } from "./uci-protocol";
+import { classifyMove as classifyMoveInternal } from "./move-classifier";
+import { calculatePlayerAccuracy } from "./accuracy-engine";
+
+export { calculatePlayerAccuracy };
+
+/**
+ * Converts a UCI move string (e.g. "g1f3", "e7e8q") into Standard Algebraic Notation (e.g. "Nf3", "e8=Q")
+ * using the board state in the given FEN.
+ */
+export function uciToSan(fen: string, uciMove?: string): string | undefined {
+  if (!uciMove || uciMove.length < 4) return undefined;
+  try {
+    const chess = new Chess(fen);
+    const from = uciMove.slice(0, 2);
+    const to = uciMove.slice(2, 4);
+    const promotion = uciMove.length > 4 ? uciMove[4].toLowerCase() : undefined;
+    const move = chess.move({ from, to, promotion });
+    return move ? move.san : uciMove;
+  } catch {
+    return uciMove;
+  }
+}
 
 /**
  * Maps evaluation (centipawns or mate) to expected win probability percentage (0 - 100) from White's perspective.
- * Uses a logistic sigmoid model standard in modern chess engines.
+ * Accounts for mate distance rather than collapsing all mates to a flat 100%.
  */
 export function centipawnsToWinProbability(
   whiteCp: number | null,
@@ -23,156 +52,32 @@ export function centipawnsToWinProbability(
 
   // Bound centipawns to avoid overflow
   const clamped = Math.max(-2000, Math.min(2000, whiteCp));
-  // Logistic function
+  // Logistic sigmoid model: W = 50 + 50 * (2 / (1 + exp(-0.0035 * cp)) - 1)
   const winProb = 50 + 50 * (2 / (1 + Math.exp(-0.0035 * clamped)) - 1);
   return Math.max(0, Math.min(100, Math.round(winProb * 10) / 10));
 }
 
 /**
- * Classifies a single played move based on active player's win-probability drop.
+ * Backward-compatible wrapper for classifyMove.
  */
 export function classifyMove(
   move: MoveRecord,
   prevWhiteProb: number,
   currWhiteProb: number,
-  plyIndex: number
-): { classification: MoveClassification; winLoss: number } {
+  plyIndex: number,
+  engineBestUci?: string
+): { classification: MoveClassification; winLoss: number; isForced: boolean } {
   const turn = move.turn;
-
-  // Calculate active player's win probability before and after the move
   const playerProbBefore = turn === "w" ? prevWhiteProb : 100 - prevWhiteProb;
   const playerProbAfter = turn === "w" ? currWhiteProb : 100 - currWhiteProb;
 
-  // Win probability lost (non-negative)
-  const delta = playerProbAfter - playerProbBefore;
-  const winLoss = Math.max(0, -delta);
-
-  // Default classification
-  let classification: MoveClassification = {
-    key: "good",
-    name: "Good",
-    icon: "",
-    color: "#86a666",
-    commentary: "A solid practical move.",
-  };
-
-  // 1. Opening Book Move (first 6 plies with minimal loss)
-  if (plyIndex < 6 && winLoss <= 2.0) {
-    classification = {
-      key: "book",
-      name: "Book",
-      icon: "📖",
-      color: "#d5a47d",
-      commentary: "Theoretical opening move.",
-    };
-    return { classification, winLoss };
-  }
-
-  // 2. Brilliant Move check (tactical piece sacrifice preserving winning advantage)
-  const isPieceSacrifice =
-    move.captured === null &&
-    ["n", "b", "r", "q"].includes(move.piece) &&
-    playerProbBefore >= 45.0 &&
-    playerProbAfter >= 45.0;
-
-  if (isPieceSacrifice && winLoss <= 1.0) {
-    classification = {
-      key: "brilliant",
-      name: "Brilliant",
-      icon: "‼️",
-      color: "#1baca6",
-      commentary: "A brilliant piece sacrifice maintaining complete tactical control!",
-    };
-    return { classification, winLoss };
-  }
-
-  // 3. Best Move
-  if (winLoss <= 1.5) {
-    classification = {
-      key: "best",
-      name: "Best",
-      icon: "⭐",
-      color: "#96bc4b",
-      commentary: "The strongest engine move in the position.",
-    };
-  }
-  // 4. Excellent Move
-  else if (winLoss <= 4.0) {
-    classification = {
-      key: "excellent",
-      name: "Excellent",
-      icon: "👍",
-      color: "#96bc4b",
-      commentary: "An excellent continuation maintaining a strong position.",
-    };
-  }
-  // 5. Good Move
-  else if (winLoss <= 8.0) {
-    classification = {
-      key: "good",
-      name: "Good",
-      icon: "",
-      color: "#86a666",
-      commentary: "A good practical move.",
-    };
-  }
-  // 6. Inaccuracy
-  else if (winLoss <= 15.0) {
-    classification = {
-      key: "inaccuracy",
-      name: "Inaccuracy",
-      icon: "❓",
-      color: "#f4bf42",
-      commentary: "An inaccuracy. Missed a slightly more active continuation.",
-    };
-  }
-  // 7. Mistake
-  else if (winLoss <= 25.0) {
-    classification = {
-      key: "mistake",
-      name: "Mistake",
-      icon: "❓❓",
-      color: "#e68f2a",
-      commentary: "A mistake! Surrendered a significant portion of advantage.",
-    };
-  }
-  // 8. Missed Win / Blunder
-  else {
-    // If player held a decisive advantage and lost it completely
-    if (playerProbBefore >= 65.0 && playerProbAfter <= 45.0) {
-      classification = {
-        key: "miss",
-        name: "Miss",
-        icon: "⚠️",
-        color: "#df6962",
-        commentary: "Missed win! Overlooked an immediate winning tactical blow.",
-      };
-    } else {
-      classification = {
-        key: "blunder",
-        name: "Blunder",
-        icon: "❌",
-        color: "#ca3431",
-        commentary: "A severe blunder that fundamentally alters the game outcome.",
-      };
-    }
-  }
-
-  return { classification, winLoss };
-}
-
-/**
- * Calculates overall player accuracy rating (0 - 100%) from win losses.
- */
-export function calculatePlayerAccuracy(winLosses: number[]): number {
-  if (!winLosses || winLosses.length === 0) return 100;
-
-  const avgLoss = winLosses.reduce((acc, cur) => acc + cur, 0) / winLosses.length;
-  if (avgLoss === 0) return 100;
-
-  // Exponential decay model
-  const rawAccuracy = 100 * Math.exp(-0.035 * avgLoss);
-  return Math.max(10.0, Math.min(99.8, Math.round(rawAccuracy * 10) / 10));
+  return classifyMoveInternal({
+    move,
+    playerProbBefore,
+    playerProbAfter,
+    plyIndex,
+    engineBestUci,
+  });
 }
 
 /**
@@ -193,11 +98,14 @@ function createEmptyCounts(): Record<MoveClassificationKey, number> {
 }
 
 /**
- * Analyzes an entire sequence of moves using position evaluations.
+ * Analyzes an entire sequence of game moves using position evaluations.
+ * Generates canonical move classifications, recommended alternatives from fenBefore,
+ * and player accuracy scores.
  */
 export function analyzeGameMoves(
   moves: MoveRecord[],
-  evaluations: UciEvaluation[]
+  evaluations: UciEvaluation[],
+  startingEval?: UciEvaluation
 ): GameAnalysisReport {
   const analyzedMoves: AnalyzedMove[] = [];
   const whiteLosses: number[] = [];
@@ -208,7 +116,10 @@ export function analyzeGameMoves(
     black: createEmptyCounts(),
   };
 
-  let prevWhiteProb = 50.0; // Start at equal position (50%)
+  // Initial win probability at the start of the game
+  let prevWhiteProb = startingEval
+    ? centipawnsToWinProbability(startingEval.whiteCp, startingEval.whiteMate)
+    : 50.0;
 
   for (let i = 0; i < moves.length; i++) {
     const move = moves[i];
@@ -226,11 +137,17 @@ export function analyzeGameMoves(
       evaluation.whiteMate
     );
 
-    const { classification, winLoss } = classifyMove(
+    // Get the evaluation before this move to determine engine's suggested alternative for active player
+    const beforeEval = i === 0 ? startingEval : evaluations[i - 1];
+    const bestMoveUci = beforeEval?.bestMove;
+    const bestMoveSan = uciToSan(move.fenBefore, bestMoveUci);
+
+    const { classification, winLoss, isForced } = classifyMove(
       move,
       prevWhiteProb,
       currWhiteProb,
-      i
+      i,
+      bestMoveUci
     );
 
     if (move.turn === "w") {
@@ -247,15 +164,21 @@ export function analyzeGameMoves(
       winProbWhite: currWhiteProb,
       winLoss,
       classification,
+      bestMoveSan,
+      bestMoveUci,
+      isForced,
     });
 
     prevWhiteProb = currWhiteProb;
   }
 
+  const whiteTotal = Math.ceil(moves.length / 2);
+  const blackTotal = Math.floor(moves.length / 2);
+
   return {
     moves: analyzedMoves,
-    whiteAccuracy: calculatePlayerAccuracy(whiteLosses),
-    blackAccuracy: calculatePlayerAccuracy(blackLosses),
+    whiteAccuracy: calculatePlayerAccuracy(whiteLosses, whiteLosses.length, whiteTotal),
+    blackAccuracy: calculatePlayerAccuracy(blackLosses, blackLosses.length, blackTotal),
     classificationCounts: counts,
   };
 }

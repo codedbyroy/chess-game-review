@@ -4,7 +4,7 @@
 
 [![CI Test Suite & Build Verification](https://github.com/codedbyroy/chess-game-review/actions/workflows/ci.yml/badge.svg)](https://github.com/codedbyroy/chess-game-review/actions/workflows/ci.yml)
 [![Deploy to GitHub Pages](https://github.com/codedbyroy/chess-game-review/actions/workflows/deploy.yml/badge.svg)](https://github.com/codedbyroy/chess-game-review/actions/workflows/deploy.yml)
-[![Tests Passing](https://img.shields.io/badge/Vitest-44%2F44%20Passed-brightgreen.svg)](docs/TESTING.md)
+[![Tests Passing](https://img.shields.io/badge/Vitest-50%2F50%20Passed-brightgreen.svg)](docs/TESTING.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](tsconfig.json)
 [![Next.js](https://img.shields.io/badge/Next.js-15.2-black.svg)](https://nextjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)

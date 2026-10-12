@@ -85,29 +85,29 @@ describe("Review Pipeline Math & Classifications", () => {
     });
 
     it("should identify a tactical piece sacrifice as Brilliant", () => {
-      const knightSacrifice: MoveRecord = {
-        ply: 20,
-        moveNumber: 11,
+      const rookSacrifice: MoveRecord = {
+        ply: 24,
+        moveNumber: 13,
         turn: "w",
-        san: "Nxf7",
-        from: "g5",
-        to: "f7",
-        piece: "n",
-        captured: null, // Piece given away without capture
-        fenBefore: "start",
-        fenAfter: "after",
+        san: "Rxd7",
+        from: "d1",
+        to: "d7",
+        piece: "r",
+        captured: "b",
+        fenBefore: "4kb1r/p2n1ppp/4q3/4p3/8/5Q2/PP1P1PPP/R1B1K1NR w KQk - 0 13",
+        fenAfter: "4kb1r/p2R1ppp/4q3/4p3/8/5Q2/PP1P1PPP/R1B1K1NR b KQk - 0 13",
       };
 
-      const result = classifyMove(knightSacrifice, 60, 60, 20);
+      const result = classifyMove(rookSacrifice, 75, 75, 24);
       expect(result.classification.key).toBe("brilliant");
       expect(result.classification.icon).toBe("‼️");
     });
   });
 
   describe("calculatePlayerAccuracy", () => {
-    it("should return 100% for zero losses", () => {
-      expect(calculatePlayerAccuracy([0, 0, 0])).toBe(100);
-      expect(calculatePlayerAccuracy([])).toBe(100);
+    it("should return 99.8% for zero losses and 0 for empty array", () => {
+      expect(calculatePlayerAccuracy([0, 0, 0])).toBe(99.8);
+      expect(calculatePlayerAccuracy([])).toBe(0);
     });
 
     it("should compute realistic accuracy for master-level play", () => {

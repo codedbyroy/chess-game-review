@@ -3,6 +3,29 @@
 All notable changes to the ChessLens project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Engine Repair — Phase B: Core Correctness] — 2026-10-12
+
+### Fixed
+- **Root Cause of Inflated Brilliant Moves Fixed (`src/lib/move-classifier.ts`)**:
+  - Replaced flawed `move.captured === null` pseudo-sacrifice check with rigorous material sacrifice detection (`isTrueMaterialSacrifice`).
+  - Standard quiet piece development (e.g. `Nf3`, `Bc4`, `Re1`) is classified as `best` or `book`, never `brilliant`.
+- **Opponent's Reply Bug in MoveFeedbackCard Fixed (`src/components/MoveFeedbackCard.tsx`)**:
+  - Evaluates starting FEN and tracks `fenBefore` for all plies.
+  - Converts active player's `bestMoveUci` into `bestMoveSan` for `fenBefore` so recommended alternatives show what the player should have played instead of the opponent's reply.
+- **Forced Move Identification**:
+  - Positions with only 1 legal move are tagged as `isForced: true` and classified as `Forced` with 0 win loss, never blunders or brilliants.
+
+### Added
+- **Modular Pipeline Separation**:
+  - Created `src/lib/move-classifier.ts` for mutually exclusive classification rules and sacrifice verification.
+  - Created `src/lib/accuracy-engine.ts` for honest weighted player accuracy scoring.
+  - Created `tests/move-classifier.test.ts` (6 unit tests).
+
+### Verified
+- `npm run typecheck`: Passed with 0 errors.
+- `npm test`: 50/50 Vitest unit tests passed across 6 test suites.
+- `npm run build`: Static export succeeded cleanly in 2.1s.
+
 ## [Phase 7: Portfolio Presentation & Enhancements] — 2026-10-12
 
 ### Added
