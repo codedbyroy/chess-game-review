@@ -3,6 +3,29 @@
 All notable changes to the ChessLens project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Phase 2: Stockfish WebAssembly Integration] — 2026-10-12
+
+### Added
+- **UCI Protocol Engine Parser (`src/lib/uci-protocol.ts`)**:
+  - Parses depth, centipawn score, mate distance, and principal variation (PV).
+  - Normalizes scores from the moving side's perspective to White's universal perspective.
+- **Engine Web Worker Service (`src/lib/engine-service.ts`)**:
+  - Dedicated background worker execution to prevent main thread blocking.
+  - Thread-safe job ID generation with automatic stale-response filtering.
+  - Request cancellation (`stop` command) and 20s safety timeout.
+- **Engine Evaluation UI (`src/components/EngineEvalCard.tsx`)**:
+  - Real-time score readout, depth meter, best move recommendations, and line previews.
+  - Configurable depth slider (12/15/18).
+- **Dynamic Evaluation Bar (`src/components/Chessboard.tsx`)**:
+  - Vertical visual bar on the chessboard reflecting White/Black advantage.
+- **Test Suite (`tests/uci-protocol.test.ts`)**:
+  - 8 new unit tests verifying centipawns, negative evaluations, forced mates, and ponder moves. Total tests: 13/13 passing.
+
+### Verified
+- `npm run typecheck`: Passed with 0 errors.
+- `npm test`: 13/13 Vitest tests passed.
+- `npm run build`: Production build and static prerendering succeeded.
+
 ## [Phase 1: Application Foundation] — 2026-10-11
 
 ### Added

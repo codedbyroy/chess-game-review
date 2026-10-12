@@ -23,13 +23,15 @@
 
 ---
 
-## Phase 2: Stockfish WebAssembly Integration
-- [ ] Audit and integrate a verified Stockfish.js / WebAssembly build.
-- [ ] Build the Web Worker abstraction for UCI (Universal Chess Interface) communication.
-- [ ] Implement lifecycle management: initialization, ready state, timeout, and termination.
-- [ ] Build single-position evaluation (`position fen`, `go depth X`, parse `info depth ... cp ... mate`).
-- [ ] Implement request cancellation and stale-response filtering.
-- [ ] Verify Phase 2: Engine runs in worker without blocking UI; tests verify UCI parsing.
+## Phase 2: Stockfish WebAssembly Integration (Completed)
+- [x] Select and verify Web Worker Stockfish integration.
+- [x] Build UCI protocol parser (`src/lib/uci-protocol.ts`) with White-perspective score normalization.
+- [x] Implement engine lifecycle management: initialization, ready state, timeout, and cancellation (`src/lib/engine-service.ts`).
+- [x] Load engine in a dedicated Web Worker to prevent UI thread blocking.
+- [x] Single-position analysis with real-time progress, best move, and principal variation (PV).
+- [x] Dynamic visual evaluation bar on chessboard reflecting centipawn & mate scores.
+- [x] Unit test suite covering UCI parser edge cases (`tests/uci-protocol.test.ts` - 8 tests).
+- [x] Verify Phase 2: Typecheck passes, 13/13 tests pass, production build succeeds.
 
 ---
 

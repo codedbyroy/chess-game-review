@@ -9,32 +9,31 @@ You are collaborating with a software engineering student. Your role is a senior
 ---
 
 ## 2. Status at Handoff
-- **Active Phase:** Phase 1 (Application Foundation) — COMPLETED.
-- **Next Phase:** Phase 2 (Stockfish WebAssembly Integration).
+- **Active Phase:** Phase 2 (Stockfish WebAssembly Integration) — COMPLETED.
+- **Next Phase:** Phase 3 (Move-by-Move Game Analysis Pipeline).
 - **Git Branch:** `master`
 - **Environment:** Node `v25.2.0`, npm `11.6.2`, Next.js 15, React 19, Tailwind CSS, TypeScript.
 
 ---
 
-## 3. What Was Completed in Phase 1
-- Bootstrapped Next.js App Router with TypeScript (`strict: true`) and Tailwind CSS.
-- Preserved initial static files cleanly inside `legacy-prototype/`.
-- Integrated official `chess.js` for legal FEN/PGN move replay.
-- Wrote unit tests in `tests/pgn-parser.test.ts` (100% pass: headers, full Opera Game plies, castling, promotion, malformed input error handling).
-- Built modular UI components:
-  - `Chessboard.tsx`: Responsive SVG board with flip, coordinates, and move highlights.
-  - `BoardControls.tsx`: Move navigation (`First`, `Previous`, `Next`, `Last`), auto-play, and keyboard shortcuts (`Left`/`Right`, `Home`/`End`, `Space`, `F`).
-  - `MoveList.tsx`: Synchronized, auto-scrolling move list.
-  - `PlayerCard.tsx`: Player metadata and dynamic "To Move" indicator.
-  - `PgnModal.tsx`: File upload and paste modal with error alerts.
-  - `Header.tsx`: Responsive branding and sample game launcher.
-- Verified: `npm run typecheck` (0 errors), `npm test` (5/5 passed), `npm run build` (Static export succeeded).
+## 3. What Was Completed in Phase 2
+- Built `src/lib/uci-protocol.ts` to parse standard UCI output lines (`info depth X score cp Y pv ...`, `info depth X score mate Z`, `bestmove M`).
+- Normalized centipawn and mate evaluations to **White's perspective** for consistent global analysis.
+- Created `src/lib/engine-service.ts` managing the Web Worker lifecycle with:
+  - Non-blocking execution on a background thread.
+  - Automatic cancellation (`stop`) and stale response guarding (`jobId`).
+  - Timeout protection.
+- Built `src/components/EngineEvalCard.tsx` with live depth meters, best move badges, line previews, and depth selector (12/15/18).
+- Integrated dynamic Evaluation Bar into `src/components/Chessboard.tsx`.
+- Added 8 unit tests in `tests/uci-protocol.test.ts`. Total tests: 13/13 passing.
+- Verified: `npm run typecheck` (0 errors), `npm test` (13/13 passed), `npm run build` (Static export succeeded).
 
 ---
 
-## 4. Immediate Next Task (Phase 2)
-When user gives the signal to start **Phase 2: Stockfish WebAssembly Integration**:
-1. Select and embed a verified Stockfish.js / WebAssembly build in `public/engine/`.
-2. Implement Web Worker bridge with UCI protocol communication (`uci`, `isready`, `position fen`, `go depth`).
-3. Handle worker lifecycle: initialization, ready state, timeout, and request cancellation.
-4. Build unit tests for UCI message parsing (`tests/uci-protocol.test.ts`).
+## 4. Immediate Next Task (Phase 3)
+When user gives the signal to start **Phase 3: Move-by-Move Game Analysis Pipeline**:
+1. Implement full-game sequential analysis queue (`src/lib/review-pipeline.ts`).
+2. Build win-probability mapping formula converting centipawns to expected win percentage ($Win\%$).
+3. Implement move classification logic (Brilliant, Best, Excellent, Good, Inaccuracy, Mistake, Blunder, Miss).
+4. Compute White and Black overall game accuracy ratings (0–100%).
+5. Add unit tests for win-probability calculation and move classification rules in `tests/review-pipeline.test.ts`.

@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { Header } from "@/components/Header";
 import { Chessboard } from "@/components/Chessboard";
 import { BoardControls } from "@/components/BoardControls";
 import { MoveList } from "@/components/MoveList";
 import { PlayerCard } from "@/components/PlayerCard";
 import { PgnModal } from "@/components/PgnModal";
+import { EngineEvalCard } from "@/components/EngineEvalCard";
 import { parsePgn, SAMPLE_OPERA_GAME } from "@/lib/pgn-parser";
 import { ParsedGame } from "@/lib/types";
-import { Trophy, Calendar, MapPin, Cpu } from "lucide-react";
+import { UciEvaluation } from "@/lib/uci-protocol";
+import { EngineService } from "@/lib/engine-service";
+import { Trophy, Calendar, MapPin } from "lucide-react";
 
 export default function HomePage() {
   const [parsedGame, setParsedGame] = useState<ParsedGame>(() =>
@@ -18,6 +21,21 @@ export default function HomePage() {
   const [currentPlyIndex, setCurrentPlyIndex] = useState<number>(-1);
   const [orientation, setOrientation] = useState<"w" | "b">("w");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Engine state
+  const [evaluation, setEvaluation] = useState<UciEvaluation | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [targetDepth, setTargetDepth] = useState<number>(15);
+
+  const engineServiceRef = useRef<EngineService | null>(null);
+
+  // Initialize engine service once on mount
+  useEffect(() => {
+    engineServiceRef.current = new EngineService();
+    return () => {
+      engineServiceRef.current?.terminate();
+    };
+  }, []);
 
   const moves = parsedGame.moves;
   const metadata = parsedGame.metadata;
@@ -37,10 +55,15 @@ export default function HomePage() {
     return moves[currentPlyIndex] || null;
   }, [currentPlyIndex, moves]);
 
-  // Navigation handlers
+  // Stop analysis and reset evaluation when navigating between moves
   const handleGoToMove = (index: number) => {
+    if (isAnalyzing) {
+      engineServiceRef.current?.stop();
+      setIsAnalyzing(false);
+    }
     const clamped = Math.max(-1, Math.min(index, moves.length - 1));
     setCurrentPlyIndex(clamped);
+    setEvaluation(null); // Clear position evaluation on navigation
   };
 
   const handleFlipBoard = () => {
@@ -48,18 +71,51 @@ export default function HomePage() {
   };
 
   const handleLoadPgn = (pgnText: string): boolean => {
+    if (isAnalyzing) {
+      engineServiceRef.current?.stop();
+      setIsAnalyzing(false);
+    }
     const result = parsePgn(pgnText);
     if (result.error || result.moves.length === 0) {
       return false;
     }
     setParsedGame(result);
     setCurrentPlyIndex(-1);
+    setEvaluation(null);
     return true;
   };
 
   const handleLoadSample = () => {
     handleLoadPgn(SAMPLE_OPERA_GAME);
   };
+
+  // Start single-position analysis
+  const handleStartAnalysis = useCallback(async () => {
+    if (!engineServiceRef.current) return;
+    setIsAnalyzing(true);
+    setEvaluation(null);
+
+    try {
+      const finalEval = await engineServiceRef.current.evaluatePosition({
+        fen: currentFen,
+        depth: targetDepth,
+        onProgress: (progress) => {
+          setEvaluation({ ...progress });
+        },
+      });
+      setEvaluation(finalEval);
+    } catch (err) {
+      console.error("[HomePage] Analysis error:", err);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [currentFen, targetDepth]);
+
+  // Stop current analysis
+  const handleStopAnalysis = useCallback(() => {
+    engineServiceRef.current?.stop();
+    setIsAnalyzing(false);
+  }, []);
 
   // Determine active turn for player cards
   const activeTurn = useMemo(() => {
@@ -76,9 +132,9 @@ export default function HomePage() {
       />
 
       {/* Main Workspace Layout */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-[560px_1fr] gap-8 items-start">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-[580px_1fr] gap-8 items-start">
         {/* Left Section: Board & Controls */}
-        <section className="flex flex-col items-center gap-3 w-full max-w-[560px] mx-auto">
+        <section className="flex flex-col items-center gap-3 w-full max-w-[580px] mx-auto">
           {/* Top Player Card */}
           <div className="w-full">
             <PlayerCard
@@ -97,11 +153,12 @@ export default function HomePage() {
             />
           </div>
 
-          {/* Interactive Chessboard */}
+          {/* Interactive Chessboard with Dynamic Eval Bar */}
           <Chessboard
             fen={currentFen}
             orientation={orientation}
             lastMove={currentMove}
+            evaluation={evaluation}
           />
 
           {/* Bottom Player Card */}
@@ -131,7 +188,7 @@ export default function HomePage() {
           />
         </section>
 
-        {/* Right Section: Game Details, Move List, & Analysis Card */}
+        {/* Right Section: Game Details, Move List, & Engine Card */}
         <section className="flex flex-col gap-5 w-full">
           {/* Game Metadata Card */}
           <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-3">
@@ -180,22 +237,15 @@ export default function HomePage() {
             onSelectMove={handleGoToMove}
           />
 
-          {/* Phase 1 Architecture & Upcoming Engine Card */}
-          <div className="bg-card/70 border border-border rounded-xl p-5 space-y-3">
-            <div className="flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-accent-green" />
-              <h3 className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
-                Engine Status & Architecture
-              </h3>
-            </div>
-            <p className="text-xs text-neutral-400 leading-relaxed">
-              Phase 1 application foundation is operational. The game board is synchronized with legal FEN state updates across all {moves.length} plies.
-            </p>
-            <div className="p-3 rounded-lg bg-[#1a1917] border border-border/80 text-[11px] font-mono text-neutral-400 space-y-1">
-              <div>• Active Position FEN:</div>
-              <div className="text-accent-green break-all select-all">{currentFen}</div>
-            </div>
-          </div>
+          {/* Live Engine Evaluation Card */}
+          <EngineEvalCard
+            evaluation={evaluation}
+            isAnalyzing={isAnalyzing}
+            targetDepth={targetDepth}
+            onDepthChange={setTargetDepth}
+            onStartAnalysis={handleStartAnalysis}
+            onStopAnalysis={handleStopAnalysis}
+          />
         </section>
       </main>
 
